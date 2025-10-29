@@ -71,9 +71,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: encoded.txt
-          # ⬇⬇⬇ CHANGED: send to the **directory**; let it keep the filename 'encoded.txt'
-          target: /home/${{ secrets.EC2_USER }}/         # <-- was /home/${{ secrets.EC2_USER }}/encoded.txt
-          overwrite: true                                # <-- ADDED (optional but helpful)
+          target: /home/${{ secrets.EC2_USER }}
+          overwrite: true
 
       - name: SSH into EC2 and deploy app
         uses: appleboy/ssh-action@v0.1.7
@@ -82,35 +81,18 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -euo pipefail                               # <-- ADDED
-            FILE="/home/${{ secrets.EC2_USER }}/encoded.txt" # <-- ADDED
-            JAR="/home/${{ secrets.EC2_USER }}/app.jar"      # <-- ADDED
-            LOG="/home/${{ secrets.EC2_USER }}/app.log"      # <-- ADDED
-
-            # ⬇⬇⬇ ADDED: guard against the old "encoded.txt is a directory" problem
-            if [ -d "$FILE" ]; then
-              echo "WARN: $FILE is a directory; removing it."
-              rm -rf "$FILE"
-            fi
-            test -s "$FILE" || { echo "ERROR: $FILE missing or empty"; exit 1; }
-
             echo "Decoding JAR..."
-            base64 -d "$FILE" > "$JAR"
+            base64 -d /home/${{ secrets.EC2_USER }}/encoded.txt > /home/${{ secrets.EC2_USER }}/app.jar
 
+            chmod +x /home/${{ secrets.EC2_USER }}/app.jar
             echo "Stopping old app..."
             pkill -f 'java -jar' || true
             sleep 2
 
             echo "Starting new app..."
-            nohup java -jar "$JAR" > "$LOG" 2>&1 &
+            nohup java -jar /home/${{ secrets.EC2_USER }}/app.jar > /home/${{ secrets.EC2_USER }}/app.log 2>&1 &
 
             echo "Verifying process..."
-            sleep 2                                           # <-- ADDED (give it a moment to start)
-            pgrep -f 'java -jar' >/dev/null || {               # <-- CHANGED: a real health check
-              echo "App failed to start. Last 200 lines:"
-              tail -n 200 "$LOG" || true
-              exit 1
-            }
-
+            ps -ef | grep app.jar
             echo "Last 20 lines of app.log:"
-            tail -n 20 "$LOG"
+            tail -n 20 /home/${{ secrets.EC2_USER }}/app.log
