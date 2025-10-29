@@ -46,7 +46,7 @@ jobs:
           name: encoded-jar
           path: .
 
-      # Clean up remote files before copy
+      # Clean up remote files before copy (handles prior bad state)
       - name: Cleanup EC2 before copy
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -57,11 +57,11 @@ jobs:
             echo "Cleaning up old files..."
             if [ -d "/home/${{ secrets.EC2_USER }}/encoded.txt" ]; then
               echo "encoded.txt is a directory — removing it..."
-              rm -rf /home/${{ secrets.EC2_USER }}/encoded.txt
+              rm -rf "/home/${{ secrets.EC2_USER }}/encoded.txt"
             fi
             if [ -d "/home/${{ secrets.EC2_USER }}/app.jar" ]; then
               echo "app.jar is a directory — removing it..."
-              rm -rf /home/${{ secrets.EC2_USER }}/app.jar
+              rm -rf "/home/${{ secrets.EC2_USER }}/app.jar"
             fi
 
       - name: Copy encoded JAR to EC2
@@ -71,7 +71,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: encoded.txt
-          target: /home/${{ secrets.EC2_USER }}/encoded.txt
+          target: /home/${{ secrets.EC2_USER }}/   # directory (trailing slash)
+          overwrite: true
 
       - name: SSH into EC2 and deploy app
         uses: appleboy/ssh-action@v0.1.7
@@ -80,18 +81,35 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Decoding JAR..."
-            base64 -d /home/${{ secrets.EC2_USER }}/encoded.txt > /home/${{ secrets.EC2_USER }}/app.jar
+            set -euo pipefail
+            FILE="/home/${{ secrets.EC2_USER }}/encoded.txt"
+            JAR="/home/${{ secrets.EC2_USER }}/app.jar"
+            LOG="/home/${{ secrets.EC2_USER }}/app.log"
 
-            chmod +x /home/${{ secrets.EC2_USER }}/app.jar
+            # Guard against prior runs where encoded.txt became a directory
+            if [ -d "$FILE" ]; then
+              echo "WARN: $FILE is a directory; removing it."
+              rm -rf "$FILE"
+            fi
+            test -s "$FILE" || { echo "ERROR: $FILE missing or empty"; exit 1; }
+
+            echo "Decoding JAR..."
+            base64 -d "$FILE" > "$JAR"
+
             echo "Stopping old app..."
             pkill -f 'java -jar' || true
             sleep 2
 
             echo "Starting new app..."
-            nohup java -jar /home/${{ secrets.EC2_USER }}/app.jar > /home/${{ secrets.EC2_USER }}/app.log 2>&1 &
+            nohup java -jar "$JAR" > "$LOG" 2>&1 &
 
             echo "Verifying process..."
-            ps -ef | grep app.jar
+            sleep 2
+            if ! pgrep -f 'java -jar' >/dev/null; then
+              echo "App failed to start. Full log follows:"
+              tail -n +1 "$LOG" || true
+              exit 1
+            fi
+
             echo "Last 20 lines of app.log:"
-            tail -n 20 /home/${{ secrets.EC2_USER }}/app.log
+            tail -n 20 "$LOG"
