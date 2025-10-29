@@ -63,7 +63,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "Decoding JAR..."
-            rm -f /home/${{ secrets.EC2_USER }}/app.jar
+            
+            # Completely remove any previous app.jar directory if it exists
+            if [ -d "/home/${{ secrets.EC2_USER }}/app.jar" ]; then
+              echo "app.jar is a directory — removing it..."
+              rm -rf /home/${{ secrets.EC2_USER }}/app.jar
+            fi
+
+            # Now decode the JAR
             base64 -d /home/${{ secrets.EC2_USER }}/encoded.txt > /home/${{ secrets.EC2_USER }}/app.jar
 
             chmod +x /home/${{ secrets.EC2_USER }}/app.jar
