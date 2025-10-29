@@ -58,14 +58,17 @@ jobs:
       - name: Check downloaded artifact
         run: ls -l target/
 
+      - name: Determine JAR filename
+        id: set_jar
+        run: |
+          JAR_FILE=$(ls target/*.jar | head -n 1)
+          echo "Found JAR: $JAR_FILE"
+          echo "::set-output name=jar_path::$JAR_FILE"
+
       - name: Copy build artifact to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/*.jar"
-          target: "/home/ubuntu/app.jar"
+        run: |
+          echo "Copying JAR to EC2..."
+          scp -i ${{ secrets.EC2_SSH_KEY }} ${{ steps.set_jar.outputs.jar_path }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/app.jar
 
       - name: SSH into EC2 and restart backend service
         uses: appleboy/ssh-action@v0.1.7
@@ -77,6 +80,12 @@ jobs:
           script: |
             echo "Stopping old app..."
             pkill -f 'java -jar' || true
+            sleep 2
 
             echo "Starting new app..."
-            nohup java -jar /home/ubuntu/app.jar > app.log 2>&1 &
+            nohup java -jar /home/ubuntu/app.jar > /home/ubuntu/app.log 2>&1 &
+            
+            echo "Verifying process..."
+            ps -ef | grep app.jar
+            echo "Last 20 lines of app.log:"
+            tail -n 20 /home/ubuntu/app.log
