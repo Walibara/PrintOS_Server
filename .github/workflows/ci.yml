@@ -46,24 +46,6 @@ jobs:
           name: encoded-jar
           path: .
 
-      # Clean up remote files before copy (handles prior bad state)
-      - name: Cleanup EC2 before copy
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Cleaning up old files..."
-            if [ -d "/home/${{ secrets.EC2_USER }}/encoded.txt" ]; then
-              echo "encoded.txt is a directory — removing it..."
-              rm -rf "/home/${{ secrets.EC2_USER }}/encoded.txt"
-            fi
-            if [ -d "/home/${{ secrets.EC2_USER }}/app.jar" ]; then
-              echo "app.jar is a directory — removing it..."
-              rm -rf "/home/${{ secrets.EC2_USER }}/app.jar"
-            fi
-
       - name: Copy encoded JAR to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -71,7 +53,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: encoded.txt
-          target: /home/${{ secrets.EC2_USER }}/   # directory (trailing slash)
+          target: /home/${{ secrets.EC2_USER }}/
           overwrite: true
 
       - name: SSH into EC2 and deploy app
@@ -82,34 +64,87 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             set -euo pipefail
+            
             FILE="/home/${{ secrets.EC2_USER }}/encoded.txt"
             JAR="/home/${{ secrets.EC2_USER }}/app.jar"
             LOG="/home/${{ secrets.EC2_USER }}/app.log"
-
-            # Guard against prior runs where encoded.txt became a directory
+            PORT=8080  # Change this to your app's port
+            
+            # Verify encoded file exists and is a file
             if [ -d "$FILE" ]; then
-              echo "WARN: $FILE is a directory; removing it."
+              echo "ERROR: $FILE is a directory; removing it."
               rm -rf "$FILE"
-            fi
-            test -s "$FILE" || { echo "ERROR: $FILE missing or empty"; exit 1; }
-
-            echo "Decoding JAR..."
-            base64 -d "$FILE" > "$JAR"
-
-            echo "Stopping old app..."
-            pkill -f 'java -jar' || true
-            sleep 2
-
-            echo "Starting new app..."
-            nohup java -jar "$JAR" > "$LOG" 2>&1 &
-
-            echo "Verifying process..."
-            sleep 2
-            if ! pgrep -f 'java -jar' >/dev/null; then
-              echo "App failed to start. Full log follows:"
-              tail -n +1 "$LOG" || true
               exit 1
             fi
-
-            echo "Last 20 lines of app.log:"
-            tail -n 20 "$LOG"
+            
+            if [ ! -f "$FILE" ]; then
+              echo "ERROR: $FILE not found"
+              exit 1
+            fi
+            
+            if [ ! -s "$FILE" ]; then
+              echo "ERROR: $FILE is empty"
+              exit 1
+            fi
+            
+            echo "Decoding JAR..."
+            base64 -d "$FILE" > "$JAR"
+            
+            # Verify decoded JAR is valid
+            if [ ! -s "$JAR" ]; then
+              echo "ERROR: Decoded JAR is empty"
+              exit 1
+            fi
+            
+            echo "Stopping old app..."
+            # Kill by port to ensure we stop the right process
+            if lsof -ti:$PORT > /dev/null 2>&1; then
+              kill $(lsof -ti:$PORT) || true
+              sleep 3
+            fi
+            
+            # Fallback: kill any java processes running the jar
+            pkill -f "java -jar.*app.jar" || true
+            sleep 2
+            
+            # Verify port is free
+            if lsof -ti:$PORT > /dev/null 2>&1; then
+              echo "ERROR: Port $PORT is still in use after killing processes"
+              lsof -i:$PORT
+              exit 1
+            fi
+            
+            echo "Starting new app..."
+            # Start with explicit output redirection
+            nohup java -jar "$JAR" > "$LOG" 2>&1 &
+            
+            echo "Waiting for app to start (30 seconds max)..."
+            for i in {1..30}; do
+              sleep 1
+              
+              # Check if process is running
+              if ! pgrep -f "java -jar.*app.jar" > /dev/null; then
+                echo "ERROR: Process died after $i seconds"
+                echo "=== Last 50 lines of log ==="
+                tail -n 50 "$LOG" 2>/dev/null || echo "No log file found"
+                exit 1
+              fi
+              
+              # Check if port is open (app is listening)
+              if lsof -ti:$PORT > /dev/null 2>&1; then
+                echo "SUCCESS: App is running on port $PORT after $i seconds"
+                echo "=== Last 20 lines of log ==="
+                tail -n 20 "$LOG"
+                exit 0
+              fi
+              
+              echo "Waiting... ($i/30)"
+            done
+            
+            # If we get here, timeout occurred
+            echo "ERROR: App did not start listening on port $PORT within 30 seconds"
+            echo "=== Full application log ==="
+            cat "$LOG" 2>/dev/null || echo "No log file found"
+            echo "=== Process status ==="
+            pgrep -a -f "java -jar" || echo "No java processes found"
+            exit 1
