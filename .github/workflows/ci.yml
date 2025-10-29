@@ -11,31 +11,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      
+name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      
+name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
 
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      
+name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |${{ runner.os }}-maven-
 
-      - name: Make Maven wrapper executable
-        run: chmod +x mvnw
+      
+name: Make Maven wrapper executable
+      run: chmod +x mvnw
 
-      - name: Build with Maven
-        run: ./mvnw clean package -DskipTests
+      
+name: Build with Maven
+      run: ./mvnw clean package -DskipTests
 
     outputs:
-      artifact_path: target/*.jar
+      artifact_path: target/.jar
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,27 +47,31 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      
+name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Copy build artifact to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "target/*.jar"
+      
+name: Copy build artifact to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "target/
+.jar"
           target: "/home/ubuntu/app.jar"
 
-      - name: SSH into EC2 and restart backend service
-        uses: appleboy/ssh-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            echo "Stopping old app..."
-            pkill -f 'java -jar' || true
+      
+name: SSH into EC2 and restart backend service
+      uses: appleboy/ssh-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "Stopping old app..."
+          pkill -f 'java -jar' || true
 
             echo "Starting new app..."
             nohup java -jar /home/ubuntu/app.jar > app.log 2>&1 &
