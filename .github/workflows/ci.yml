@@ -34,8 +34,11 @@ jobs:
       - name: Build with Maven
         run: ./mvnw clean package -DskipTests
 
-    outputs:
-      artifact_path: target/*.jar
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: target/*.jar
 
   deploy:
     runs-on: ubuntu-latest
@@ -43,8 +46,11 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: app-jar
+          path: ./target
 
       - name: Copy build artifact to EC2
         uses: appleboy/scp-action@v0.1.7
@@ -64,6 +70,5 @@ jobs:
           script: |
             echo "Stopping old app..."
             pkill -f 'java -jar' || true
-
             echo "Starting new app..."
             nohup java -jar /home/ubuntu/app.jar > app.log 2>&1 &
