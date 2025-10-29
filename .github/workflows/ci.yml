@@ -63,14 +63,14 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "Decoding JAR..."
-            
-            # Completely remove any previous app.jar directory if it exists
-            if [ -d "/home/${{ secrets.EC2_USER }}/app.jar" ]; then
-              echo "app.jar is a directory — removing it..."
+
+            # Always remove any existing app.jar (file or directory)
+            if [ -e "/home/${{ secrets.EC2_USER }}/app.jar" ] || [ -d "/home/${{ secrets.EC2_USER }}/app.jar" ]; then
+              echo "Removing old app.jar (file or directory)..."
               rm -rf /home/${{ secrets.EC2_USER }}/app.jar
             fi
 
-            # Now decode the JAR
+            # Decode the new JAR
             base64 -d /home/${{ secrets.EC2_USER }}/encoded.txt > /home/${{ secrets.EC2_USER }}/app.jar
 
             chmod +x /home/${{ secrets.EC2_USER }}/app.jar
