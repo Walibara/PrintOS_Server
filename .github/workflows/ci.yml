@@ -71,7 +71,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: encoded.txt
-          target: /home/${{ secrets.EC2_USER }}/encoded.txt
+          target: /home/${{ secrets.EC2_USER }}
+          
 
       - name: SSH into EC2 and deploy app
         uses: appleboy/ssh-action@v0.1.7
