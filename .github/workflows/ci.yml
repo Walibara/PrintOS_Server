@@ -1,5 +1,3 @@
-name: Java CI/CD
-
 on:
   push:
     branches: [ main ]
@@ -7,9 +5,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,10 +18,13 @@ jobs:
           java-version: 17
 
       - name: Build JAR
-        run: mvn clean package -DskipTests
+        run: |
+          mvn clean package -DskipTests
+          ls -lh target/
 
-      - name: Encode JAR
-        run: base64 target/*.jar > encoded.txt
+      - name: Encode JAR to Base64
+        run: |
+          base64 target/*.jar > encoded.txt
 
       - name: Upload encoded JAR
         uses: actions/upload-artifact@v4
@@ -32,26 +32,80 @@ jobs:
           name: encoded-jar
           path: encoded.txt
 
-      - name: Deploy to EC2
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download encoded JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: encoded-jar
+          path: .
+
+      - name: Cleanup EC2 before copy
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "Cleaning up old files..."
+            if [ -d "/home/${{ secrets.EC2_USER }}/encoded.txt" ]; then
+              echo "encoded.txt is a directory — removing it..."
+              rm -rf "/home/${{ secrets.EC2_USER }}/encoded.txt"
+            fi
+            if [ -d "/home/${{ secrets.EC2_USER }}/app.jar" ]; then
+              echo "app.jar is a directory — removing it..."
+              rm -rf "/home/${{ secrets.EC2_USER }}/app.jar"
+            fi
+
+      - name: Copy encoded JAR to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: encoded.txt
+          target: /home/${{ secrets.EC2_USER }}/
+          overwrite: true
+
+      - name: SSH into EC2 and deploy app
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+
             FILE="/home/${{ secrets.EC2_USER }}/encoded.txt"
             JAR="/home/${{ secrets.EC2_USER }}/app.jar"
             LOG="/home/${{ secrets.EC2_USER }}/app.log"
 
+            if [ -d "$FILE" ]; then
+              echo "WARN: $FILE is a directory; removing it."
+              rm -rf "$FILE"
+            fi
+
+            test -s "$FILE" || { echo "ERROR: $FILE missing or empty"; exit 1; }
+
             echo "Decoding JAR..."
             base64 -d "$FILE" > "$JAR"
-            chmod +x "$JAR"
 
             echo "Stopping old app..."
             pkill -f 'java -jar' || true
             sleep 2
 
             echo "Starting new app..."
-            nohup setsid java -jar "$JAR" > "$LOG" 2>&1 < /dev/null & disown
+            nohup java -jar "$JAR" > "$LOG" 2>&1 &
 
-            echo "App deployed and running. Logs at $LOG"
+            echo "Verifying process..."
+            sleep 2
+            if ! pgrep -f 'java -jar' >/dev/null; then
+              echo "App failed to start. Full log follows:"
+              tail -n +1 "$LOG" || true
+              exit 1
+            fi
+
+            echo "Last 20 lines of app.log:"
+            tail -n 20 "$LOG"
