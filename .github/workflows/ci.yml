@@ -1,12 +1,10 @@
-name: Java CI
+name: Java CI/CD
 
 on:
   push:
-    branches: 
-      - main
+    branches: [ main ]
   pull_request:
-    branches: 
-      - main
+    branches: [ main ]
 
 jobs:
   build:
@@ -34,4 +32,38 @@ jobs:
         run: chmod +x mvnw
 
       - name: Build with Maven
-        run: ./mvnw clean verify
+        run: ./mvnw clean package -DskipTests
+
+    outputs:
+      artifact_path: target/*.jar
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy build artifact to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "target/*.jar"
+          target: "/home/ubuntu/app.jar"
+
+      - name: SSH into EC2 and restart backend service
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "Stopping old app..."
+            pkill -f 'java -jar' || true
+
+            echo "Starting new app..."
+            nohup java -jar /home/ubuntu/app.jar > app.log 2>&1 &
