@@ -52,6 +52,6 @@ jobs:
             sleep 2
 
             echo "Starting new app..."
-            nohup setsid java -jar "$JAR" > "$LOG" 2>&1 < /dev/null &
+            nohup setsid java -jar "$JAR" > "$LOG" 2>&1 < /dev/null & disown
 
             echo "App deployed and running. Logs at $LOG"
