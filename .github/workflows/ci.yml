@@ -46,7 +46,6 @@ jobs:
           name: encoded-jar
           path: .
 
-      # Clean up remote files before copy (handles prior bad state)
       - name: Cleanup EC2 before copy
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -71,7 +70,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: encoded.txt
-          target: /home/${{ secrets.EC2_USER }}/   # directory (trailing slash)
+          target: /home/${{ secrets.EC2_USER }}/
           overwrite: true
 
       - name: SSH into EC2 and deploy app
@@ -95,16 +94,18 @@ jobs:
 
             echo "Decoding JAR..."
             base64 -d "$FILE" > "$JAR"
+            chmod +x "$JAR"
 
             echo "Stopping old app..."
             pkill -f 'java -jar' || true
             sleep 2
 
             echo "Starting new app..."
-            nohup java -jar "$JAR" > "$LOG" 2>&1 &
+            # Use setsid to fully detach from SSH session
+            nohup setsid java -jar "$JAR" > "$LOG" 2>&1 < /dev/null &
 
             echo "Verifying process..."
-            sleep 2
+            sleep 3
             if ! pgrep -f 'java -jar' >/dev/null; then
               echo "App failed to start. Full log follows:"
               tail -n +1 "$LOG" || true
