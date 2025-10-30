@@ -9,9 +9,8 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -20,36 +19,29 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Build JAR with Maven
-        run: |
-          mvn clean package -DskipTests
-          ls -lh target/
+      - name: Build JAR
+        run: mvn clean package -DskipTests
 
-      - name: Copy JAR to EC2
-        uses: appleboy/scp-action@v0.1.7
+      - name: Encode JAR to Base64
+        run: base64 target/*.jar > encoded.txt
+
+      - name: Upload encoded JAR
+        uses: actions/upload-artifact@v4
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: target/*.jar
-          target: /home/${{ secrets.EC2_USER }}/
-          overwrite: true
+          name: encoded-jar
+          path: encoded.txt
 
-      - name: Deploy app on EC2
+      - name: Copy and deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -euo pipefail
+            FILE="/home/${{ secrets.EC2_USER }}/encoded.txt"
+            JAR="/home/${{ secrets.EC2_USER }}/app.jar"
+            LOG="/home/${{ secrets.EC2_USER }}/app.log"
 
-            # Stop old app if running
+            base64 -d "$FILE" > "$JAR"
             pkill -f 'java -jar' || true
-            sleep 2
-
-            # Start new app fully detached
-            nohup setsid java -jar /home/${{ secrets.EC2_USER }}/app.jar > /home/${{ secrets.EC2_USER }}/app.log 2>&1 < /dev/null &
-
-            echo "App deployed and running."
-            echo "Logs available at /home/${{ secrets.EC2_USER }}/app.log"
+            nohup java -jar "$JAR" > "$LOG" 2>&1 &
