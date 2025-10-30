@@ -9,11 +9,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./PrintOS_Server
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -25,7 +23,7 @@ jobs:
       - name: Build JAR
         run: mvn clean package -DskipTests
 
-      - name: Encode JAR to Base64
+      - name: Encode JAR
         run: base64 target/*.jar > encoded.txt
 
       - name: Upload encoded JAR
@@ -45,12 +43,15 @@ jobs:
             JAR="/home/${{ secrets.EC2_USER }}/app.jar"
             LOG="/home/${{ secrets.EC2_USER }}/app.log"
 
-            # Decode and overwrite JAR
+            echo "Decoding JAR..."
             base64 -d "$FILE" > "$JAR"
+            chmod +x "$JAR"
 
-            # Stop old app
+            echo "Stopping old app..."
             pkill -f 'java -jar' || true
             sleep 2
 
-            # Start new app detached
-            nohup java -jar "$JAR" > "$LOG" 2>&1 &
+            echo "Starting new app..."
+            nohup setsid java -jar "$JAR" > "$LOG" 2>&1 < /dev/null &
+
+            echo "App deployed and running. Logs at $LOG"
