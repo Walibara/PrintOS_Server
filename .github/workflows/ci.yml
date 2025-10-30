@@ -3,9 +3,11 @@ name: Java CI/CD
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,8 +19,8 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-          
-      - name: Build JAR
+
+      - name: Build JAR with Maven
         run: |
           mvn clean package -DskipTests
           ls -lh target/
@@ -42,11 +44,11 @@ jobs:
           script: |
             set -euo pipefail
 
-            mv /home/${{ secrets.EC2_USER }}/PrintOS_Server-0.0.1-SNAPSHOT.jar /home/${{ secrets.EC2_USER }}/app.jar || true
-
+            # Stop old app if running
             pkill -f 'java -jar' || true
             sleep 2
 
+            # Start new app fully detached
             nohup setsid java -jar /home/${{ secrets.EC2_USER }}/app.jar > /home/${{ secrets.EC2_USER }}/app.log 2>&1 < /dev/null &
 
             echo "App deployed and running."
