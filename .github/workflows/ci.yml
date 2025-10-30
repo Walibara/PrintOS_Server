@@ -17,7 +17,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-
+          
       - name: Build JAR
         run: |
           mvn clean package -DskipTests
@@ -30,7 +30,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: target/*.jar
-          target: /home/${{ secrets.EC2_USER }}/app.jar
+          target: /home/${{ secrets.EC2_USER }}/
           overwrite: true
 
       - name: Deploy app on EC2
@@ -40,11 +40,14 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Stop old app if running
+            set -euo pipefail
+
+            mv /home/${{ secrets.EC2_USER }}/PrintOS_Server-0.0.1-SNAPSHOT.jar /home/${{ secrets.EC2_USER }}/app.jar || true
+
             pkill -f 'java -jar' || true
             sleep 2
 
-            # Start new app fully detached
             nohup setsid java -jar /home/${{ secrets.EC2_USER }}/app.jar > /home/${{ secrets.EC2_USER }}/app.log 2>&1 < /dev/null &
 
-            echo "App deployed and running. Logs: /home/${{ secrets.EC2_USER }}/app.log"
+            echo "App deployed and running."
+            echo "Logs available at /home/${{ secrets.EC2_USER }}/app.log"
