@@ -9,6 +9,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./PrintOS_Server
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -31,7 +34,7 @@ jobs:
           name: encoded-jar
           path: encoded.txt
 
-      - name: Copy and deploy to EC2
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -42,6 +45,12 @@ jobs:
             JAR="/home/${{ secrets.EC2_USER }}/app.jar"
             LOG="/home/${{ secrets.EC2_USER }}/app.log"
 
+            # Decode and overwrite JAR
             base64 -d "$FILE" > "$JAR"
+
+            # Stop old app
             pkill -f 'java -jar' || true
+            sleep 2
+
+            # Start new app detached
             nohup java -jar "$JAR" > "$LOG" 2>&1 &
