@@ -64,7 +64,6 @@ jobs:
           source: "target/*.jar"
           target: "/home/ubuntu/"
 
-
       - name: SSH into EC2 and restart backend service
         uses: appleboy/ssh-action@v0.1.7
         with:
@@ -72,8 +71,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Stopping old app..."
-            pkill -f 'java -jar' || true
+            echo "Reloading systemd daemon..."
+            sudo systemctl daemon-reload
 
-            echo "Starting new app..."
-            nohup java -jar /home/ubuntu/app.jar > app.log 2>&1 &
+            echo "Restarting PrintOS service..."
+            sudo systemctl restart printos
+
+            echo "Checking service status..."
+            sudo systemctl status printos --no-pager
