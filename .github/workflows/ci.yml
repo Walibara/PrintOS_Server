@@ -55,7 +55,7 @@ jobs:
           name: app-jar
           path: target
 
-      - name: Copy build artifact to EC2 (skip tar for speed)
+      - name: Copy build artifact to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -63,7 +63,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "target/*.jar"
           target: "/home/ubuntu/"
-          tar: false   # << skip tar for faster transfer
 
       - name: SSH into EC2 and restart backend service
         uses: appleboy/ssh-action@v0.1.7
@@ -78,7 +77,6 @@ jobs:
             echo "Starting new app..."
             nohup java -jar /home/ubuntu/app.jar > /home/ubuntu/app.log 2>&1 &
 
-            # Wait for backend to be ready (10 attempts, 5s interval)
             echo "Waiting for backend to start..."
             for i in {1..10}; do
               if curl -s http://127.0.0.1:8080/api/hello >/dev/null; then
