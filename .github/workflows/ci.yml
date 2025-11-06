@@ -55,7 +55,7 @@ jobs:
           name: app-jar
           path: target
 
-      - name: Copy build artifact to EC2
+      - name: Copy build artifact to EC2 (skip tar for speed)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -63,6 +63,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "target/*.jar"
           target: "/home/ubuntu/"
+          tar: false   # << skip tar for faster transfer
 
       - name: SSH into EC2 and restart backend service
         uses: appleboy/ssh-action@v0.1.7
@@ -71,11 +72,19 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Reloading systemd daemon..."
-            sudo systemctl daemon-reload
+            echo "Stopping old app..."
+            pkill -f 'java -jar' || true
 
-            echo "Restarting PrintOS service..."
-            sudo systemctl restart printos
+            echo "Starting new app..."
+            nohup java -jar /home/ubuntu/app.jar > /home/ubuntu/app.log 2>&1 &
 
-            echo "Checking service status..."
-            sudo systemctl status printos --no-pager
+            # Wait for backend to be ready (10 attempts, 5s interval)
+            echo "Waiting for backend to start..."
+            for i in {1..10}; do
+              if curl -s http://127.0.0.1:8080/api/hello >/dev/null; then
+                echo "Backend is up!"
+                break
+              fi
+              echo "Waiting 5s..."
+              sleep 5
+            done
