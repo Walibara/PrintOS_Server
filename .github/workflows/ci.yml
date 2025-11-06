@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build and Package
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +32,7 @@ jobs:
       - name: Make Maven wrapper executable
         run: chmod +x mvnw
 
-      - name: Build with Maven
+      - name: Build with Maven (skip tests)
         run: ./mvnw clean package -DskipTests
 
       - name: Upload build artifact
@@ -41,6 +42,7 @@ jobs:
           path: target/*.jar
 
   deploy:
+    name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
@@ -61,15 +63,15 @@ jobs:
           source: "target/*.jar"
           target: "/home/ubuntu/app/app.jar"
 
-      - name: SSH into EC2 and restart backend service
+      - name: Restart backend service on EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Stopping old app..."
-            pkill -f 'java -jar' || true
+            echo "Stopping old PrintOS service..."
+            sudo systemctl stop printos || true
 
             echo "Reloading systemd daemon..."
             sudo systemctl daemon-reload
@@ -77,8 +79,5 @@ jobs:
             echo "Restarting PrintOS service..."
             sudo systemctl restart printos
 
-            echo "Starting new app..."
-            nohup java -jar /home/ubuntu/app/app.jar > /home/ubuntu/app.log 2>&1 &
-
-            echo "Checking service status..."
+            echo "Checking PrintOS service status..."
             sudo systemctl status printos --no-pager
