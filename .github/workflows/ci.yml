@@ -46,9 +46,6 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
@@ -62,27 +59,20 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "target/*.jar"
-          target: "/home/ubuntu/"
+          target: "/home/ubuntu/app/app.jar"
 
-      - name: SSH into EC2 and restart backend service
+      - name: Restart backend service via systemd
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo "Stopping old app..."
-            pkill -f 'java -jar' || true
+            echo "Reloading systemd daemon..."
+            sudo systemctl daemon-reload
 
-            echo "Starting new app..."
-            nohup java -jar /home/ubuntu/app.jar > /home/ubuntu/app.log 2>&1 &
+            echo "Restarting backend service..."
+            sudo systemctl restart my-backend.service
 
-            echo "Waiting for backend to start..."
-            for i in {1..10}; do
-              if curl -s http://127.0.0.1:8080/api/hello >/dev/null; then
-                echo "Backend is up!"
-                break
-              fi
-              echo "Waiting 5s..."
-              sleep 5
-            done
+            echo "Checking service status..."
+            sudo systemctl status my-backend.service --no-pager
