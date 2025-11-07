@@ -15,16 +15,19 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Use patterns so subdomains work and CloudFront/Amplify are covered
-        config.setAllowedOriginPatterns(Arrays.asList(
-            "https://*.amplifyapp.com",
-            "https://*.cloudfront.net",
-            "http://localhost:*"
+        // Exact origins 
+        config.setAllowedOrigins(Arrays.asList(
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://main.d22sjrfdf1uqnw.amplifyapp.com",
+            "https://dkdavnbhgrmho.cloudfront.net"
         ));
 
-        config.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        config.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
         config.setAllowedHeaders(Arrays.asList("*"));
-    
+        config.setAllowCredentials(true);  // allow cookies/auth headers if needed
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
