@@ -1,4 +1,4 @@
-package com.capstone.printos_server;
+package com.capstone.printos_server.config;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
