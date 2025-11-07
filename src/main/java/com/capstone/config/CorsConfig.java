@@ -30,7 +30,7 @@ public class CorsConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration cfg = new CorsConfiguration();
 
-    // Allow your Amplify app, your CloudFront distro, and local dev
+    // Allow Amplify app, your CloudFront distro, and local dev
     cfg.setAllowedOriginPatterns(List.of(
         "https://*.amplifyapp.com",
         "https://*.cloudfront.net",
