@@ -1,4 +1,4 @@
-package com.capstone.printos_server.config;
+package com.capstone.printos_server;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +8,7 @@ public class HelloController {
 
     @GetMapping("/api/hello")
     public String hello() {
-        return "Hello from Spring Boot - 11/6/2025!";
+        return "Hello from Spring Boot - 11/7/2025!";
     }
 }
+
