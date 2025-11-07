@@ -15,19 +15,20 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
+        config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList(
                 "https://main.d22sjrfd1uqnw.amplifyapp.com",
                 "https://dkdavnbhgrmho.cloudfront.net",
                 "http://localhost:5173",
                 "http://localhost:3000"
         ));
-
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true);
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
 }
+
