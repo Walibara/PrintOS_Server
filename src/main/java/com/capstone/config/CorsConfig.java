@@ -1,4 +1,4 @@
-package com.capstone.config;
+package com.capstone.printos_server.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
