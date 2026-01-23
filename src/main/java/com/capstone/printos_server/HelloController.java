@@ -8,7 +8,7 @@ public class HelloController {
 
     @GetMapping("/api/hello")
     public String hello() {
-        return "Hello from Spring Boot - 11/7/2025!";
+        return "New Year, New Issues! Let's get this going :)";
     }
 }
 
