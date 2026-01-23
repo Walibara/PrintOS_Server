@@ -8,7 +8,7 @@ public class HelloController {
 
     @GetMapping("/api/hello")
     public String hello() {
-        return "New Year, New Issues! Let's get this going :)";
+        return "Checking if the pipeline sends the update... 1/23/26 @ 8:41am";
     }
 }
 
