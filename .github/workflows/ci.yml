@@ -61,7 +61,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "target/*.jar"
-          target: "/home/ubuntu/app.jar"
+          target: "/home/ubuntu/"
 
       - name: Restart backend service on EC2
         uses: appleboy/ssh-action@v0.1.7
