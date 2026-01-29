@@ -32,3 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 .env
+
+target/
+*.log
+nohup.out
+
