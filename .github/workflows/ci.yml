@@ -61,7 +61,8 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "target/*.jar"
-          target: "/home/ubuntu/app/app.jar"
+          target: "/home/ubuntu/"
+          strip_components: 1 # This prevents it from creating a /target/ folder on EC2
 
       - name: Restart backend service on EC2
         uses: appleboy/ssh-action@v0.1.7
@@ -72,6 +73,9 @@ jobs:
           script: |
             echo "Stopping old PrintOS service..."
             sudo systemctl stop printos || true
+
+            #Added - move the new build to the file the server uses
+            sudo mv /home/ubuntu/printos_server-*.jar /home/ubuntu/app.jar
 
             echo "Reloading systemd daemon..."
             sudo systemctl daemon-reload
