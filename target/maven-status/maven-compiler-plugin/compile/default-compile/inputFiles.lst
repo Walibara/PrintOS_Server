@@ -1,2 +1,9 @@
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\config\CorsConfig.java
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\errors\ApiErrorHandler.java
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\errors\ApiException.java
 C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\HelloController.java
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\jobs\CreateJobRequest.java
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\jobs\Job.java
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\jobs\JobController.java
+C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\jobs\JobRepository.java
 C:\Users\stefa\OneDrive\Documents\GitHub\PrintOS_Server\src\main\java\com\capstone\printos_server\PrintosServerApplication.java
