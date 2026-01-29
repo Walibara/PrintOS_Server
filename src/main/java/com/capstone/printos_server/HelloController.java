@@ -14,6 +14,6 @@ public class HelloController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = now.format(formatter);
         
-        return "Hello from Spring Boot! Let's display local time to make sure we are working: " + formattedDateTime;
+        return "Hello from Spring Boot!" + formattedDateTime;
     }
 }
