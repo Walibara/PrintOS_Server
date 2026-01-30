@@ -16,19 +16,26 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
+
         config.setAllowedOrigins(Arrays.asList(
-                "https://main.d22sjrfdf1uqnw.amplifyapp.com",
-                "https://dkdavnbhgrmho.cloudfront.net",
-                "http://localhost:5173",
-                "http://localhost:3000"
+            "https://main.d22sjrfdfluqnw.amplifyapp.com", // Amplify frontend (correct)
+            "https://dkdavnbhgrmho.cloudfront.net",     // API domain
+            "http://localhost:5173",                    // local dev
+            "http://localhost:3000"                     // local dev
         ));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        config.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
+
         config.setAllowedHeaders(Arrays.asList("*"));
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return new CorsFilter(source);
     }
 }
+
 
