@@ -16,20 +16,14 @@ public class CorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-
-        //  Use patterns (more reliable behind CloudFront/proxies)
-        config.setAllowedOriginPatterns(Arrays.asList(
+        config.setAllowedOrigins(Arrays.asList(
                 "https://main.d22sjrfdf1uqnw.amplifyapp.com",
                 "https://dkdavnbhgrmho.cloudfront.net",
                 "http://localhost:5173",
                 "http://localhost:3000"
         ));
-
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // Better: explicit headers commonly used
-        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
-
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -37,5 +31,4 @@ public class CorsConfig {
         return new CorsFilter(source);
     }
 }
-
 
