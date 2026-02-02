@@ -18,7 +18,7 @@ public class CorsConfig {
         config.setAllowCredentials(true);
 
         config.setAllowedOrigins(Arrays.asList(
-            "https://main.d22sjrfdfluqnw.amplifyapp.com", // Amplify frontend (correct)
+            "https://main.d22sjrfdf1uqnw.amplifyapp.com", // Amplify frontend (correct)
             "https://dkdavnbhgrmho.cloudfront.net",     // API domain
             "http://localhost:5173",                    // local dev
             "http://localhost:3000"                     // local dev
