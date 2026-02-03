@@ -50,9 +50,10 @@ public class JobController {
         }
     }
 
-    //Emma 2/2/26 Get Mapping
+    //Emma 2/2/26 Get Mapping - Get request http://3.144.187.189:8080/api/jobs
     @PostMapping("/get-job")
     public ResponseEntity<Job> getJob(@RequestBody GetJobRequest req) {
+
         if (req == null) throw new ApiException(400, "Request body is required");
         if (req.getJobType() == null || req.getJobType().trim().isEmpty())
             throw new ApiException(400, "jobType is required");
