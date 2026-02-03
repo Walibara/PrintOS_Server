@@ -56,7 +56,7 @@ public class JobController {
         if (req == null) throw new ApiException(400, "Error with getting");
         if (req.jobType == null || req.jobType.trim().isEmpty())
             throw new ApiException(400, "jobType is required");
-        if (req.quantity == null || req.getQuantity < 1)
+        if (req.quantity == null || req.quantity < 1)
             throw new ApiException(400, "quantity must be at least 1");
 
         try {
