@@ -62,7 +62,7 @@ public class JobController {
 
         try {
             Job job = new Job();
-            job.setJobType(req.getJobType().trim());
+            job.setJobType(req.jobType().trim());
             job.setQuantity(req.getQuantity());
             job.setMaterial(req.getMaterial());
             job.setOriginalFile(req.getOriginalFile());
