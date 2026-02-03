@@ -60,7 +60,7 @@ public class JobController {
             @RequestParam(required = false) String fileType,
             @RequestParam(required = false) String additionalCustomization,
             @RequestParam(required = false) String additionalComments,
-            @RequestParam(required = false) String uploadedByUserId
+            @RequestParam(required = false) Long uploadedByUserId
     ) {
         
         if (jobType == null || jobType.trim().isEmpty())
