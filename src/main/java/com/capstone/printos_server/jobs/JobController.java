@@ -52,37 +52,8 @@ public class JobController {
 
     //Emma 2/2/26 Get Mapping - Get request http://3.144.187.189:8080/api/jobs
     @GetMapping
-    public ResponseEntity<Job> getJob(
-            @RequestParam String jobType,
-            @RequestParam Integer quantity,
-            @RequestParam(required = false) String material,
-            @RequestParam(required = false) String originalFile,
-            @RequestParam(required = false) String fileType,
-            @RequestParam(required = false) String additionalCustomization,
-            @RequestParam(required = false) String additionalComments,
-            @RequestParam(required = false) Long uploadedByUserId
-    ) {
-        
-        if (jobType == null || jobType.trim().isEmpty())
-            throw new ApiException(400, "jobType is required");
-        if (quantity == null || quantity < 1)
-            throw new ApiException(400, "quantity must be at least 1");
-
-        Job job = new Job();
-        job.setJobType(jobType.trim());
-        job.setQuantity(quantity);
-        job.setMaterial(material);
-        job.setOriginalFile(originalFile);
-        job.setFileType(fileType);
-        job.setAdditionalCustomization(additionalCustomization);
-        job.setAdditionalComments(additionalComments);
-        job.setUploadedByUserId(uploadedByUserId);
-
-        job.setStatus("GOTTEN");
-        job.setLastUpdatedBy(uploadedByUserId == null ? "user:unknown" : "user:" + uploadedByUserId);
-
-        Job saved = repo.save(job);
-
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<List<Job>> getJobs() {
+        List<Job> jobs = repo.findAll();
+        return ResponseEntity.ok(jobs);
     }
 }
