@@ -84,3 +84,4 @@ public class JobController {
             throw new ApiException(500, "Failed to get job: " + e.getMessage());
         }
     }
+}
