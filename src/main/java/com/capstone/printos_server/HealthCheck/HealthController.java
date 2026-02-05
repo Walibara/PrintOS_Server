@@ -21,7 +21,7 @@ public class HealthController {
         this.healthRepo = healthRepo;
     }
 
-    @GetMapping("/health")
+    @GetMapping("/status")
     public ResponseEntity<Map<String, Object>> getHealth() {
         Map<String, Object> response = new HashMap<>();
         try {
