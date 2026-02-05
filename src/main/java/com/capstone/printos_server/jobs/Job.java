@@ -66,6 +66,8 @@ public class Job {
         this.lastUpdatedAt = Instant.now();
     }
 
+    
+
     // Getters & setters
     public Long getId() { return id; }
 
