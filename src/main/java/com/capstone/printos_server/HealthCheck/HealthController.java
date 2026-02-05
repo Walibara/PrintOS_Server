@@ -12,7 +12,7 @@ public class HealthController {
 
     private final HealthRepository healthRepo;
 
-    public StatusController(HealthRepository healthRepo) {
+    public HealthController(HealthRepository healthRepo) {
         this.healthRepo = healthRepo;
     }
 
@@ -20,10 +20,10 @@ public class HealthController {
     public ResponseEntity<Map<String, Object>> getHealth() {
         Map<String, Object> response = new HashMap<>();
         try {
-            LocalDateTime dbTime = healthRepo.getDatabaseTime();
+            LocalDateTime dbTime = statusRepo.getDatabaseTime();
             response.put("timestamp", dbTime.toString());
             response.put("message", "found");
-            return ResponseEntity.ok(response); //HTTP 200 good :)
+            return ResponseEntity.ok(response);  //HTTP 200 good :)
         } catch (Exception e) {
             response.put("timestamp", LocalDateTime.now().toString());
             response.put("message", "not found");
