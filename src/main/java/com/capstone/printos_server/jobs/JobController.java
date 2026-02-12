@@ -38,7 +38,11 @@ public class JobController {
             job.setUploadedByUserId(req.uploadedByUserId);
 
             job.setStatus("CREATED");
-            job.setLastUpdatedBy(req.uploadedByUserId == null ? "user:unknown" : "user:" + req.uploadedByUserId);
+            job.setLastUpdatedBy(
+                req.uploadedByUserId == null
+                        ? "user:unknown"
+                        : "user:" + req.uploadedByUserId
+            );
 
             Job saved = repo.save(job);
 
@@ -56,5 +60,22 @@ public class JobController {
     public ResponseEntity<List<Job>> getJobs() {
         List<Job> jobs = repo.findAll();
         return ResponseEntity.ok(jobs);
+    }
+
+    // Malek - DELETE API endpoint
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteJob(@PathVariable Long id) {
+
+        if (!repo.existsById(id)) {
+            return ResponseEntity.notFound().build(); // 404
+        }
+
+        try {
+            repo.deleteById(id);
+            return ResponseEntity.noContent().build(); // 204
+
+        } catch (Exception e) {
+            throw new ApiException(500, "Failed to delete job: " + e.getMessage());
+        }
     }
 }
