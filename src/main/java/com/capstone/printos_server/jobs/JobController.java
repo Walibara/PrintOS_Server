@@ -66,16 +66,11 @@ public class JobController {
         return ResponseEntity.ok(jobs);
     }
 
-    //Emma - Heartbeat
+    //Emma - Heartbeat, return timestamp for a job
     @PutMapping("/dw/jobs/{id}/heartbeat")
-    public ResponseEntity<Void> heartbeat(@PathVariable Long id) {
-        Job job = repo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
-    
-        job.setLastHeartbeatTimestamp(LocalDateTime.now());
-        repo.save(job);
-    
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
+        LocalDateTime dbTime = repo.getDatabaseTimestamp();
+        return ResponseEntity.ok(dbTime);
     }
 
     // Malek - DELETE API endpoint
