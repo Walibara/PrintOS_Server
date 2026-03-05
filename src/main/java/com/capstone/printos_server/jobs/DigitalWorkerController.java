@@ -23,6 +23,7 @@ public class DigitalWorkerController{
     @PutMapping("/{id}/heartbeat")
     public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
         //Return db time! 
+        System.out.println("Heartbeat reached from digital worker, job id is = " + id); 
         LocalDateTime dbTime = repo.getDatabaseTimestamp();
         return ResponseEntity.ok(dbTime);
     }
