@@ -18,6 +18,25 @@ public class DigitalWorkerController {
         this.repo = repo;
     }
 
+    // Maria - Wakeup endpoint
+    @PostMapping("/wakeup")
+    public ResponseEntity<?> wakeupWorker() {
+        try {
+            System.out.println("Wakeup request reached from digital worker");
+
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Digital worker is awake");
+            response.put("timestamp", repo.getDatabaseTimestamp());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("Server error during wakeup: " + e.getMessage());
+            return ResponseEntity.status(500)
+                    .body(Map.of("message", "Server error during wakeup"));
+        }
+    }
+
     // Emma - Heartbeat, return timestamp for a job
     @PutMapping("/{id}/heartbeat")
     public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
