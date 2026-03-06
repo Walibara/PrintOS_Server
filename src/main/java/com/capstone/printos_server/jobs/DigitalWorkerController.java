@@ -1,30 +1,93 @@
 package com.capstone.printos_server.jobs;
 
-import com.capstone.printos_server.errors.ApiException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.capstone.printos_server.jobs.JobRepository;
 
-import java.net.URI;
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/dw/jobs")
-public class DigitalWorkerController{
+public class DigitalWorkerController {
     private final JobRepository repo;
 
-    //Constructor injection grabs repo
-    public DigitalWorkerController(JobRepository repo){
-        this.repo = repo; 
+    // Constructor injection grabs repo
+    public DigitalWorkerController(JobRepository repo) {
+        this.repo = repo;
     }
 
-    //Emma - Heartbeat, return timestamp for a job
+    // Emma - Heartbeat, return timestamp for a job
     @PutMapping("/{id}/heartbeat")
     public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
-        //Return db time! 
-        System.out.println("Heartbeat reached from digital worker, job id is = " + id); 
+        System.out.println("Heartbeat reached from digital worker, job id is = " + id);
         LocalDateTime dbTime = repo.getDatabaseTimestamp();
         return ResponseEntity.ok(dbTime);
+    }
+
+    // Claim the oldest available job for a digital worker
+    @PostMapping("/claim")
+    public ResponseEntity<?> claimJob() {
+        try {
+            System.out.println("Claim request reached from digital worker");
+
+            List<Job> jobs = repo.findAll();
+            Job claimableJob = null;
+
+            for (Job job : jobs) {
+                if ("CREATED".equalsIgnoreCase(job.getStatus())) {
+                    if (claimableJob == null || job.getCreatedAt().isBefore(claimableJob.getCreatedAt())) {
+                        claimableJob = job;
+                    }
+                }
+            }
+
+            if (claimableJob == null) {
+                System.out.println("No claimable job found");
+                return ResponseEntity.status(404)
+                        .body(Map.of("message", "No claimable job found"));
+            }
+
+            if (!"CREATED".equalsIgnoreCase(claimableJob.getStatus())) {
+                System.out.println("Job already claimed, id = " + claimableJob.getId());
+                return ResponseEntity.status(409)
+                        .body(Map.of(
+                                "message", "Job already claimed",
+                                "jobId", claimableJob.getId(),
+                                "status", claimableJob.getStatus()
+                        ));
+            }
+
+            claimableJob.setStatus("IN_PROGRESS");
+            claimableJob.setLastUpdatedBy("digital-worker");
+
+            Job savedJob = repo.save(claimableJob);
+
+            System.out.println("Job successfully claimed, id = " + savedJob.getId());
+
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("message", "Job successfully claimed");
+            response.put("jobId", savedJob.getId());
+            response.put("jobType", savedJob.getJobType());
+            response.put("quantity", savedJob.getQuantity());
+            response.put("material", savedJob.getMaterial());
+            response.put("originalFile", savedJob.getOriginalFile());
+            response.put("fileType", savedJob.getFileType());
+            response.put("additionalCustomization", savedJob.getAdditionalCustomization());
+            response.put("additionalComments", savedJob.getAdditionalComments());
+            response.put("cost", savedJob.getCost());
+            response.put("status", savedJob.getStatus());
+            response.put("createdAt", savedJob.getCreatedAt());
+            response.put("uploadedByUserId", savedJob.getUploadedByUserId());
+            response.put("lastUpdatedBy", savedJob.getLastUpdatedBy());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("Server error while claiming job: " + e.getMessage());
+            return ResponseEntity.status(500)
+                    .body(Map.of("message", "Server error"));
+        }
     }
 }
