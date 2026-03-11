@@ -43,12 +43,13 @@ public class DigitalWorkerController {
                 }
             }
 
+            // 204 No Content → no jobs available
             if (claimableJob == null) {
                 System.out.println("No claimable job found");
-                return ResponseEntity.status(404)
-                        .body(Map.of("message", "No claimable job found"));
+                return ResponseEntity.noContent().build();
             }
 
+            // 409 Conflict → job exists but is not claimable
             if (!"CREATED".equalsIgnoreCase(claimableJob.getStatus())) {
                 System.out.println("Job already claimed, id = " + claimableJob.getId());
                 return ResponseEntity.status(409)
@@ -82,10 +83,13 @@ public class DigitalWorkerController {
             response.put("uploadedByUserId", savedJob.getUploadedByUserId());
             response.put("lastUpdatedBy", savedJob.getLastUpdatedBy());
 
+            // 200 OK → job claimed successfully
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             System.out.println("Server error while claiming job: " + e.getMessage());
+
+            // 500 Internal Server Error
             return ResponseEntity.status(500)
                     .body(Map.of("message", "Server error"));
         }
