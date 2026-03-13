@@ -26,33 +26,41 @@ public class DigitalWorkerController {
         return ResponseEntity.ok(dbTime);
     }
 
-    //Emma - Job Result API
+     //Emma - Job Result API
     @PutMapping("/{id}/result")
-    public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId){
-        Job job; 
-        try {
-            job = repo.findById(jobId); 
-        }catch(Exception error){
-            //Never recieved job, 404
-            ResponseEntity.notFound().build(); 
+    public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId, @RequestBody Map<String, String> digitalWorkerResponseBody){
+        //Possible responses from the digital worker: success, failed, error, timeout
+        Optional<Job> jobOption = repo.findById(jobId); 
+        //findById() returns an Optional/container object
+        //Ensure container is not empty, if it is, job is not found
+        if (jobOption.isEmpty()){
+            return ResponseEntity.notFound().build(); 
         }
+        //Optional exists, so the job does as well
+        Job job = jobOption.get(); 
 
-        //Hmm bad case? jobid = 2 for testing purposes
-        if (jobId == 2){
+        //If status != success, then that means the digital worker died or something
+        if("failed".equals(digitalWorkerResponseBody.get("status"))){
             job.setStatus("FAILED");
             job.setLastUpdatedBy("digital-worker");
-            job.save(claimableJob); 
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build(); 
+            repo.save(job); 
+            return ResponseEntity.ok().build();  
+        }else if("error".equals(digitalWorkerResponseBody.get("status"))){
+            job.setStatus("ERROR");
+            job.setLastUpdatedBy("digital-worker");
+            repo.save(job); 
+            return ResponseEntity.ok().build();  
+        }else if("timeout".equals(digitalWorkerResponseBody.get("status"))){
+            job.setStatus("TIMEOUT");
+            job.setLastUpdatedBy("digital-worker");
+            repo.save(job); 
+            return ResponseEntity.ok().build();  
         }
 
+        //OTHERWISE if everything looks gucci, then set the job status to be finished.
         job.setStatus("FINISHED");
         job.setLastUpdatedBy("digital-worker");
-        
-        try{
-            job.save(claimableJob); //actual bad case
-        }catch(){
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();//503
-        }
+        repo.save(job);
         return ResponseEntity.ok().build();//200
     }
 
