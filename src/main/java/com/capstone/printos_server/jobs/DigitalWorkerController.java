@@ -27,13 +27,14 @@ public class DigitalWorkerController {
         return ResponseEntity.ok(dbTime);
     }
 
-     //Emma - Job Result API
+    //Emma - Job Result API
     @PutMapping("/{id}/result")
     public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId, @RequestBody Map<String, String> digitalWorkerResponseBody){
         //Possible responses from the digital worker: success, failed, error, timeout
         Optional<Job> jobOption = repo.findById(jobId); 
         //findById() returns an Optional/container object
         //Ensure container is not empty, if it is, job is not found
+        System.out.println("In the jobResults")
         if (jobOption.isEmpty()){
             return ResponseEntity.notFound().build(); 
         }
@@ -57,11 +58,13 @@ public class DigitalWorkerController {
             repo.save(job); 
             return ResponseEntity.ok().build();  
         }
+        System.out.println("boopppp");
 
         //OTHERWISE if everything looks gucci, then set the job status to be finished.
         job.setStatus("FINISHED");
         job.setLastUpdatedBy("digital-worker");
         repo.save(job);
+        System.out.println("boopppp");
         return ResponseEntity.ok().build();//200
     }
 
