@@ -26,6 +26,36 @@ public class DigitalWorkerController {
         return ResponseEntity.ok(dbTime);
     }
 
+    //Emma - Job Result API
+    @PutMapping("/{id}/result")
+    public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId){
+        Job job; 
+        try {
+            job = repo.findById(jobId); 
+        }catch(Exception error){
+            //Never recieved job, 404
+            ResponseEntity.notFound().build(); 
+        }
+
+        //Hmm bad case? jobid = 2 for testing purposes
+        if (jobId == 2){
+            job.setStatus("FAILED");
+            job.setLastUpdatedBy("digital-worker");
+            job.save(claimableJob); 
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build(); 
+        }
+
+        job.setStatus("FINISHED");
+        job.setLastUpdatedBy("digital-worker");
+        
+        try{
+            job.save(claimableJob); //actual bad case
+        }catch(){
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();//503
+        }
+        return ResponseEntity.ok().build();//200
+    }
+
     // Claim the oldest available job for a digital worker
     @PostMapping("/claim")
     public ResponseEntity<?> claimJob() {
