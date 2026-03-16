@@ -20,43 +20,50 @@ public class DigitalWorkerController {
     }
 
     // Emma - Heartbeat, return timestamp for a job
-    @PutMapping("/{id}/heartbeat")
-    public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
-        System.out.println("Heartbeat reached from digital worker, job id is = " + id);
-        LocalDateTime dbTime = repo.getDatabaseTimestamp();
-        return ResponseEntity.ok(dbTime);
-    }
+//    @PutMapping("/{id}/heartbeat")
+  //  public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
+   //     System.out.println("Heartbeat reached from digital worker, job id is = " + id);
+    //    String dbTime = repo.getDatabaseTimestamp();
+     //   return ResponseEntity.ok(dbTime);
+   // }
+   //mona
+     @PutMapping("/{id}/heartbeat")
+     public ResponseEntity<String> heartbeat(@PathVariable Long id) {
+          System.out.println("Heartbeat reached from digital worker, job id is = " + id);
+          String dbTime = repo.getDatabaseTimestamp();
+          return ResponseEntity.ok(dbTime);
+     }
 
     //Emma - Job Result API
     @PutMapping("/{id}/result")
     public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId, @RequestBody Map<String, String> digitalWorkerResponseBody){
         //Possible responses from the digital worker: success, failed, error, timeout
-        Optional<Job> jobOption = repo.findById(jobId); 
+        Optional<Job> jobOption = repo.findById(jobId);
         //findById() returns an Optional/container object
         //Ensure container is not empty, if it is, job is not found
-        System.out.println("In the jobResults")
+        System.out.println("In the jobResults");
         if (jobOption.isEmpty()){
-            return ResponseEntity.notFound().build(); 
+            return ResponseEntity.notFound().build();
         }
         //Optional exists, so the job does as well
-        Job job = jobOption.get(); 
+        Job job = jobOption.get();
 
         //If status != success, then that means the digital worker died or something
         if("failed".equals(digitalWorkerResponseBody.get("status"))){
             job.setStatus("FAILED");
             job.setLastUpdatedBy("digital-worker");
-            repo.save(job); 
-            return ResponseEntity.ok().build();  
+            repo.save(job);
+            return ResponseEntity.ok().build();
         }else if("error".equals(digitalWorkerResponseBody.get("status"))){
             job.setStatus("ERROR");
             job.setLastUpdatedBy("digital-worker");
-            repo.save(job); 
-            return ResponseEntity.ok().build();  
+            repo.save(job);
+            return ResponseEntity.ok().build();
         }else if("timeout".equals(digitalWorkerResponseBody.get("status"))){
             job.setStatus("TIMEOUT");
             job.setLastUpdatedBy("digital-worker");
-            repo.save(job); 
-            return ResponseEntity.ok().build();  
+            repo.save(job);
+            return ResponseEntity.ok().build();
         }
         System.out.println("boopppp");
 
@@ -79,7 +86,7 @@ public class DigitalWorkerController {
 
             for (Job job : jobs) {
                 if ("CREATED".equalsIgnoreCase(job.getStatus())) {
-                    if (claimableJob == null || job.getCreatedAt().isBefore(claimableJob.getCreatedAt())) {
+                    if (claimableJob == null || job.getCreatedAt().before(claimableJob.getCreatedAt())) {
                         claimableJob = job;
                     }
                 }

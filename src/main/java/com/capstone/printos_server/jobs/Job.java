@@ -1,109 +1,230 @@
 package com.capstone.printos_server.jobs;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.Instant;
+import java.sql.Timestamp;
+
+/*
+ Job Entity
+ Represents a row inside the jobs table
+*/
 
 @Entity
 @Table(name = "jobs")
 public class Job {
 
+    // Primary Key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="job_type", nullable = false, length = 100)
+    // Job info
+    private String name;
+
+    @Column(name = "job_type")
     private String jobType;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    // File info
+    private String files;
 
-    @Column(length = 100)
-    private String material;
-
-    @Column(name="original_file", length = 500)
-    private String originalFile;
-
-    @Column(name="file_type", length = 50)
+    @Column(name = "file_type")
     private String fileType;
 
-    @Column(name="additional_customization", length = 255)
-    private String additionalCustomization;
+    // Worker system fields
+    @Column(name = "current_worker_id")
+    private String currentWorkerId;
 
-    @Column(name="additional_comments", length = 255)
-    private String additionalComments;
+    @Column(name = "last_heartbeat_at")
+    private Timestamp lastHeartbeatAt;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal cost;
+    @Column(name = "retry_count")
+    private int retryCount;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "max_retries")
+    private int maxRetries;
+
     private String status;
 
-    @Column(name="created_at", updatable = false)
-    private Instant createdAt;
+    // Metadata
+    @Column(name = "created_at")
+    private Timestamp createdAt;
 
-    @Column(name="last_updated_at")
-    private Instant lastUpdatedAt;
+    @Column(name = "last_updated_at")
+    private Timestamp lastUpdatedAt;
 
-    @Column(name="uploaded_by_user_id")
+    @Column(name = "uploaded_by_user_id")
     private Long uploadedByUserId;
 
-    @Column(name="last_updated_by", length = 100)
+    @Column(name = "last_updated_by")
     private String lastUpdatedBy;
 
-    @PrePersist
-    void onCreate() {
-        Instant now = Instant.now();
-        this.createdAt = now;
-        this.lastUpdatedAt = now;
-        if (this.status == null || this.status.isBlank()) {
-            this.status = "CREATED";
-        }
+    @Column(name = "additional_comments")
+    private String additionalComments;
+
+    // -----------------------------------
+    // Extra fields used by controllers
+    // -----------------------------------
+
+    private Integer quantity;
+
+    private String material;
+
+    private String originalFile;
+
+    private String additionalCustomization;
+
+    private Double cost;
+
+    // -----------------------------------
+    // Getters and Setters
+    // -----------------------------------
+
+    public Long getId() {
+        return id;
     }
 
-    @PreUpdate
-    void onUpdate() {
-        this.lastUpdatedAt = Instant.now();
+    public String getName() {
+        return name;
     }
 
-    
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    // Getters & setters
-    public Long getId() { return id; }
+    public String getJobType() {
+        return jobType;
+    }
 
-    public String getJobType() { return jobType; }
-    public void setJobType(String jobType) { this.jobType = jobType; }
+    public void setJobType(String jobType) {
+        this.jobType = jobType;
+    }
 
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
+    public String getFiles() {
+        return files;
+    }
 
-    public String getMaterial() { return material; }
-    public void setMaterial(String material) { this.material = material; }
+    public void setFiles(String files) {
+        this.files = files;
+    }
 
-    public String getOriginalFile() { return originalFile; }
-    public void setOriginalFile(String originalFile) { this.originalFile = originalFile; }
+    public String getFileType() {
+        return fileType;
+    }
 
-    public String getFileType() { return fileType; }
-    public void setFileType(String fileType) { this.fileType = fileType; }
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
+    }
 
-    public String getAdditionalCustomization() { return additionalCustomization; }
-    public void setAdditionalCustomization(String additionalCustomization) { this.additionalCustomization = additionalCustomization; }
+    public String getCurrentWorkerId() {
+        return currentWorkerId;
+    }
 
-    public String getAdditionalComments() { return additionalComments; }
-    public void setAdditionalComments(String additionalComments) { this.additionalComments = additionalComments; }
+    public void setCurrentWorkerId(String currentWorkerId) {
+        this.currentWorkerId = currentWorkerId;
+    }
 
-    public BigDecimal getCost() { return cost; }
-    public void setCost(BigDecimal cost) { this.cost = cost; }
+    public Timestamp getLastHeartbeatAt() {
+        return lastHeartbeatAt;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setLastHeartbeatAt(Timestamp lastHeartbeatAt) {
+        this.lastHeartbeatAt = lastHeartbeatAt;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getLastUpdatedAt() { return lastUpdatedAt; }
+    public int getRetryCount() {
+        return retryCount;
+    }
 
-    public Long getUploadedByUserId() { return uploadedByUserId; }
-    public void setUploadedByUserId(Long uploadedByUserId) { this.uploadedByUserId = uploadedByUserId; }
+    public void setRetryCount(int retryCount) {
+        this.retryCount = retryCount;
+    }
 
-    public String getLastUpdatedBy() { return lastUpdatedBy; }
-    public void setLastUpdatedBy(String lastUpdatedBy) { this.lastUpdatedBy = lastUpdatedBy; }
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public Timestamp getLastUpdatedAt() {
+        return lastUpdatedAt;
+    }
+
+    public Long getUploadedByUserId() {
+        return uploadedByUserId;
+    }
+
+    public void setUploadedByUserId(Long uploadedByUserId) {
+        this.uploadedByUserId = uploadedByUserId;
+    }
+
+    public String getLastUpdatedBy() {
+        return lastUpdatedBy;
+    }
+
+    public void setLastUpdatedBy(String lastUpdatedBy) {
+        this.lastUpdatedBy = lastUpdatedBy;
+    }
+
+    public String getAdditionalComments() {
+        return additionalComments;
+    }
+
+    public void setAdditionalComments(String additionalComments) {
+        this.additionalComments = additionalComments;
+    }
+
+    // -------- Custom Fields --------
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public String getOriginalFile() {
+        return originalFile;
+    }
+
+    public void setOriginalFile(String originalFile) {
+        this.originalFile = originalFile;
+    }
+
+    public String getAdditionalCustomization() {
+        return additionalCustomization;
+    }
+
+    public void setAdditionalCustomization(String additionalCustomization) {
+        this.additionalCustomization = additionalCustomization;
+    }
+
+    public Double getCost() {
+        return cost;
+    }
+
+    public void setCost(Double cost) {
+        this.cost = cost;
+    }
 }
