@@ -59,7 +59,7 @@ public class JobController {
                         return userRepository.save(newUser);
                     });
 
-        try {
+        
             Job job = new Job();
             job.setJobType(req.jobType.trim());
             job.setQuantity(req.quantity);
@@ -78,6 +78,9 @@ public class JobController {
             return ResponseEntity
                     .created(URI.create("/api/jobs/" + saved.getId()))
                     .body(saved);
+            
+        } catch (ApiException e) {
+            throw e;
 
         } catch (Exception e) {
             throw new ApiException(500, "Failed to create job: " + e.getMessage());
