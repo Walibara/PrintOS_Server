@@ -1,7 +1,11 @@
 package com.capstone.printos_server.jobs;
 
 import com.capstone.printos_server.errors.ApiException;
+import com.capstone.printos_server.users.User;
+import com.capstone.printos_server.users.UserRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt; 
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -16,19 +20,44 @@ import java.util.List;
 public class JobController {
 
     private final JobRepository repo;
+    private final UserRepository userRepository;
 
-    public JobController(JobRepository repo) {
+    public JobController(JobRepository repo, UserRepository userRepository) {
         this.repo = repo;
+        this.userRepository = userRepository;
     }
 
     @PostMapping
-    public ResponseEntity<Job> createJob(@RequestBody CreateJobRequest req) {
+    public ResponseEntity<Job> createJob(
+            @RequestBody CreateJobRequest req,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         // Manual validation (so you still meet “return 400 for invalid requests”)
         if (req == null) throw new ApiException(400, "Request body is required");
         if (req.jobType == null || req.jobType.trim().isEmpty())
             throw new ApiException(400, "jobType is required");
         if (req.quantity == null || req.quantity < 1)
             throw new ApiException(400, "quantity must be at least 1");
+        if (req.originalFile == null || req.originalFile.trim().isEmpty()) 
+            throw new ApiException(400, "originalFile is required");
+        if (jwt == null) 
+            throw new ApiException(401, "User authentication is required");
+
+        try {
+            String cognitoSub = jwt.getClaimAsString("sub");
+            String email = jwt.getClaimAsString("email"); 
+
+            if (cognitoSub == null || cognitoSub.trim().isEmpty()) { 
+                throw new ApiException(401, "Invalid token: missing user sub");
+            }
+
+            User user = userRepository.findByCognitoSub(cognitoSub) 
+                    .orElseGet(() -> {
+                        User newUser = new User();
+                        newUser.setCognitoSub(cognitoSub);
+                        newUser.setEmail(email);
+                        return userRepository.save(newUser);
+                    });
 
         try {
             Job job = new Job();
@@ -37,16 +66,12 @@ public class JobController {
             job.setMaterial(req.material);
             job.setOriginalFile(req.originalFile);
             job.setFileType(req.fileType);
-            job.setAdditionalCustomization(req.additionalCustomization);
             job.setAdditionalComments(req.additionalComments);
-            job.setUploadedByUserId(req.uploadedByUserId);
+            job.setUploadedByUserId(user.getId()); 
 
             job.setStatus("CREATED");
-            job.setLastUpdatedBy(
-                req.uploadedByUserId == null
-                        ? "user:unknown"
-                        : "user:" + req.uploadedByUserId
-            );
+            job.setLastUpdatedBy("user:" + user.getId());
+            
 
             Job saved = repo.save(job);
 
