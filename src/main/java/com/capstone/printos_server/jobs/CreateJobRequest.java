@@ -7,7 +7,6 @@ public class CreateJobRequest {
     public String material;
     public String originalFile;
     public String fileType;
-    public String additionalCustomization;
     public String additionalComments;
-    public Long uploadedByUserId;
 }
+//removed uploadedByUserId and uploadedByUserId. (Maria)
