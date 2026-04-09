@@ -86,7 +86,7 @@ public class DigitalWorkerController {
 
             for (Job job : jobs) {
                 if ("CREATED".equalsIgnoreCase(job.getStatus())) {
-                    if (claimableJob == null || job.getCreatedAt().before(claimableJob.getCreatedAt())) {
+                    if (claimableJob == null || (job.getCreatedAt() != null && claimableJob.getCreatedAt() != null && job.getCreatedAt().before(claimableJob.getCreatedAt()))) {
                         claimableJob = job;
                     }
                 }
