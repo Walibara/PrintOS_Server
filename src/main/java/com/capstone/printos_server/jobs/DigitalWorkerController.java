@@ -19,6 +19,8 @@ public class DigitalWorkerController {
         this.repo = repo;
     }
 
+    
+
     // Emma - Heartbeat, return timestamp for a job
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
