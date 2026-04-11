@@ -30,6 +30,7 @@ public class DigitalWorkerController {
     //Emma - Job Result API
     @PutMapping("/{id}/result")
     public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId, @RequestBody Map<String, String> digitalWorkerResponseBody){
+        System.out.println("In the job results!"); 
         //Possible responses from the digital worker: success, failed, error, timeout
         Optional<Job> jobOption = repo.findById(jobId);
         //findById() returns an Optional/container object
@@ -41,9 +42,9 @@ public class DigitalWorkerController {
         //Optional exists, so the job does as well
         Job job = jobOption.get();
 
-        System.out.println("What is the Digital Worker Status = " + digitalWorkerResponseBody.get("status") ); 
         //If status != success, then that means the digital worker died or something
         if("failed".equals(digitalWorkerResponseBody.get("status"))){
+            System.out.println("Why am I in the failing section?"); 
             job.setStatus("FAILED");
             job.setLastUpdatedBy("digital-worker");
             repo.save(job);
