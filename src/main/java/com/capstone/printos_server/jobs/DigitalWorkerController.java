@@ -23,6 +23,7 @@ public class DigitalWorkerController {
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
           String dbTime = repo.getDatabaseTimestamp();
+          System.out.println("Is dbTime getting set in the database? = " + dbTime); 
           return ResponseEntity.ok(dbTime);
      }
 
