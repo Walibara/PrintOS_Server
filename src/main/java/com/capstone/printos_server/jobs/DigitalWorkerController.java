@@ -40,6 +40,7 @@ public class DigitalWorkerController {
         //Optional exists, so the job does as well
         Job job = jobOption.get();
 
+
         System.out.println("What is the Digital Worker Status = " + digitalWorkerResponseBody.get("status") ); 
         //If status != success, then that means the digital worker died or something
         if("failed".equals(digitalWorkerResponseBody.get("status"))){
