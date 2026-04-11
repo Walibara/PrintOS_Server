@@ -20,13 +20,6 @@ public class DigitalWorkerController {
     }
 
     // Emma - Heartbeat, return timestamp for a job
-//    @PutMapping("/{id}/heartbeat")
-  //  public ResponseEntity<LocalDateTime> heartbeat(@PathVariable Long id) {
-   //     System.out.println("Heartbeat reached from digital worker, job id is = " + id);
-    //    String dbTime = repo.getDatabaseTimestamp();
-     //   return ResponseEntity.ok(dbTime);
-   // }
-   //mona
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
           System.out.println("Heartbeat reached from digital worker, job id is = " + id);
@@ -59,13 +52,7 @@ public class DigitalWorkerController {
             job.setLastUpdatedBy("digital-worker");
             repo.save(job);
             return ResponseEntity.ok().build();
-        }else if("timeout".equals(digitalWorkerResponseBody.get("status"))){
-            job.setStatus("TIMEOUT");
-            job.setLastUpdatedBy("digital-worker");
-            repo.save(job);
-            return ResponseEntity.ok().build();
         }
-        System.out.println("boopppp");
 
         //OTHERWISE if everything looks gucci, then set the job status to be finished.
         job.setStatus("FINISHED");
@@ -79,8 +66,7 @@ public class DigitalWorkerController {
     @PostMapping("/claim")
     public ResponseEntity<?> claimJob() {
         try {
-            System.out.println("Claim request reached from digital worker");
-
+            
             List<Job> jobs = repo.findAll();
             Job claimableJob = null;
 
