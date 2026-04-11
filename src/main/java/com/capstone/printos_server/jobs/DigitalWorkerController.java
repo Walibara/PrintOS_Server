@@ -19,12 +19,9 @@ public class DigitalWorkerController {
         this.repo = repo;
     }
 
-    
-
     // Emma - Heartbeat, return timestamp for a job
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
-          System.out.println("Heartbeat reached from digital worker, job id is = " + id);
           String dbTime = repo.getDatabaseTimestamp();
           return ResponseEntity.ok(dbTime);
      }
@@ -43,6 +40,7 @@ public class DigitalWorkerController {
         //Optional exists, so the job does as well
         Job job = jobOption.get();
 
+        System.out.println("What is the Digital Worker Status = " + digitalWorkerResponseBody.get("status") ); 
         //If status != success, then that means the digital worker died or something
         if("failed".equals(digitalWorkerResponseBody.get("status"))){
             job.setStatus("FAILED");
