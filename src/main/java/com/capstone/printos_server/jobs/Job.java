@@ -46,7 +46,7 @@ public class Job {
 
     // Metadata
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private String createdAt;
 
     @Column(name = "last_updated_at")
     private Timestamp lastUpdatedAt;
@@ -154,11 +154,11 @@ public class Job {
         this.status = status;
     }
 
-    public Timestamp getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt){
+    public void setCreatedAt(String createdAt){
         this.createdAt = createdAt; 
     }
 
