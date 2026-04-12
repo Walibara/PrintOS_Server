@@ -19,7 +19,7 @@ public class DigitalWorkerController {
         this.repo = repo;
     }
 
-    // Emma - Heartbeat, return timestamp for a job
+      //Emma - Heartbeat, return timestamp for a job
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
 
@@ -33,8 +33,9 @@ public class DigitalWorkerController {
         String dbTime = repo.getDatabaseTimestamp();
 
         System.out.println("Is dbTime getting set in the database? = " + dbTime); 
+        job.setLastHeartbeatAt(new Timestamp(System.currentTimeMillis()));
+        repo.save(job); 
         
-        job.setLastHeartbeatAt(dbTime);
         return ResponseEntity.ok(dbTime);
      }
 
