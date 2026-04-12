@@ -85,6 +85,7 @@ public class JobController {
 
             //Emma added CreatedAt
             //Reference: https://stackoverflow.com/questions/7492423/how-can-i-convert-a-timestamp-into-either-date-or-datetime-object
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             Date date = new Date(timestamp.getTime());
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
             job.setCreatedAt(simpleDateFormat.format(date));
