@@ -154,7 +154,7 @@ public class Job {
         this.status = status;
     }
 
-    public TimeStamp getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
