@@ -46,7 +46,7 @@ public class Job {
 
     // Metadata
     @Column(name = "created_at")
-    private Timestamp createdAt; //Do we need this for CreatedAt? Emma asking
+    private Timestamp createdAt;
 
     @Column(name = "last_updated_at")
     private Timestamp lastUpdatedAt;

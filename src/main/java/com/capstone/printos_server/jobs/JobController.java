@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 
 import java.net.URI;
 import java.util.List;
+import java.sql.Timestamp;
 
 @RestController
 @RequestMapping("/api/jobs")
