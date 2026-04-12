@@ -15,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 import java.net.URI;
 import java.util.List;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -80,7 +82,12 @@ public class JobController {
             job.setFileType(req.fileType);
             job.setAdditionalComments(req.additionalComments);
             job.setUploadedByUserId(user.getId()); 
-            job.setCreatedAt(new Timestamp(System.currentTimeMillis())); //Emma added this 4/11
+
+            //Emma added CreatedAt
+            //Reference: https://stackoverflow.com/questions/7492423/how-can-i-convert-a-timestamp-into-either-date-or-datetime-object
+            Date date = new Date(timestamp.getTime());
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
+            job.setCreatedAt(simpleDateFormat.format(date));
 
             job.setStatus("CREATED");
             job.setLastUpdatedBy("user:" + user.getId());
