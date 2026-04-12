@@ -82,13 +82,7 @@ public class JobController {
             job.setFileType(req.fileType);
             job.setAdditionalComments(req.additionalComments);
             job.setUploadedByUserId(user.getId()); 
-
-            //Emma added CreatedAt
-            //Reference: https://stackoverflow.com/questions/7492423/how-can-i-convert-a-timestamp-into-either-date-or-datetime-object
-            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            Date date = new Date(timestamp.getTime());
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy' 'HH:mm:ss:S");
-            job.setCreatedAt(simpleDateFormat.format(date));
+            job.setCreatedAt(new Timestamp(System.currentTimeMillis());//Emma added this line 4/11
 
             job.setStatus("CREATED");
             job.setLastUpdatedBy("user:" + user.getId());
