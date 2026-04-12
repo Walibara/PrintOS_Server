@@ -82,7 +82,7 @@ public class JobController {
             job.setFileType(req.fileType);
             job.setAdditionalComments(req.additionalComments);
             job.setUploadedByUserId(user.getId()); 
-            job.setCreatedAt(new Timestamp(System.currentTimeMillis());//Emma added this line 4/11
+            job.setCreatedAt(new Timestamp(System.currentTimeMillis()));//Emma added this line 4/11
 
             job.setStatus("CREATED");
             job.setLastUpdatedBy("user:" + user.getId());
