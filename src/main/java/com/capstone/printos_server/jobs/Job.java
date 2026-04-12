@@ -46,7 +46,7 @@ public class Job {
 
     // Metadata
     @Column(name = "created_at")
-    private Timestamp createdAt;
+    private Timestamp createdAt; //Do we need this for CreatedAt? Emma asking
 
     @Column(name = "last_updated_at")
     private Timestamp lastUpdatedAt;
@@ -156,6 +156,10 @@ public class Job {
 
     public Timestamp getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt){
+        this.createdAt = createdAt; 
     }
 
     public Timestamp getLastUpdatedAt() {
