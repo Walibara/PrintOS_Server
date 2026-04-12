@@ -22,9 +22,20 @@ public class DigitalWorkerController {
     // Emma - Heartbeat, return timestamp for a job
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
-          String dbTime = repo.getDatabaseTimestamp();
-          System.out.println("Is dbTime getting set in the database? = " + dbTime); 
-          return ResponseEntity.ok(dbTime);
+
+        Optional<Job> jobOption = repo.findById(id);
+
+        if (jobOption.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+        
+        Job job = jobOption.get();
+        String dbTime = repo.getDatabaseTimestamp();
+
+        System.out.println("Is dbTime getting set in the database? = " + dbTime); 
+        
+        job.setLastHeartbeatAt(dbTime);
+        return ResponseEntity.ok(dbTime);
      }
 
     //Emma - Job Result API
