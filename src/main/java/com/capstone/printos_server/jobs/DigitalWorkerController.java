@@ -20,7 +20,7 @@ public class DigitalWorkerController {
         this.repo = repo;
     }
 
-      //Emma - Heartbeat, return timestamp for a job
+    //Emma - Heartbeat, return timestamp for a job
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
 
@@ -52,12 +52,11 @@ public class DigitalWorkerController {
         if (jobOption.isEmpty()){
             return ResponseEntity.notFound().build();
         }
-        //Optional exists, so the job does as well
+        
         Job job = jobOption.get();
 
         //If status != success, then that means the digital worker died or something
         if("failed".equals(digitalWorkerResponseBody.get("status"))){
-            System.out.println("Why am I in the failing section?"); 
             job.setStatus("FAILED");
             job.setLastUpdatedBy("digital-worker");
             repo.save(job);
@@ -73,11 +72,10 @@ public class DigitalWorkerController {
         job.setStatus("FINISHED");
         job.setLastUpdatedBy("digital-worker");
         repo.save(job);
-        System.out.println("boopppp");
-        return ResponseEntity.ok().build();//200
+        return ResponseEntity.ok().build();
     }
 
-    // Claim the oldest available job for a digital worker
+    // Malek - Claim the oldest available job for a digital worker
     @PostMapping("/claim")
     public ResponseEntity<?> claimJob() {
         try {
