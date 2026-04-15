@@ -8,12 +8,12 @@ import java.time.format.DateTimeFormatter;
 @RestController
 public class HelloController {
 
-    @GetMapping("/api/hello")
+   /* @GetMapping("/api/hello")
     public String hello() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formattedDateTime = now.format(formatter);
         
         return "Hello from Spring Boot!" + formattedDateTime;
-    }
+    }*/
 }
