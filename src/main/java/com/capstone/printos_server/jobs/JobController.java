@@ -36,7 +36,7 @@ public class JobController {
         List<Long> list = new ArrayList<>();
         list.add(userId); 
         List<User> users = userRepository.findAllById(list);
-        return ResponseEntity.ok(users); 
+        return ResponseEntity.ok(users[0]); 
     }
 
     //Maria
