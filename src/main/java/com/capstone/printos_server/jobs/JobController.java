@@ -31,12 +31,11 @@ public class JobController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping("/userId")
-    public ResponseEntity<User> getUser(@PathVariable Long userId){
-        List<Long> list = new ArrayList<>();
-        list.add(userId); 
-        List<User> users = userRepository.findAllById(list);
-        return ResponseEntity.ok(users[0]); 
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUser(@PathVariable Long userId) {
+        return userRepository.findById(userId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     //Maria
