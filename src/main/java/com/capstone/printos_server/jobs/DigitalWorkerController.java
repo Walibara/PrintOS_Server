@@ -24,6 +24,7 @@ public class DigitalWorkerController {
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
 
+        System.debug("HAPPY PATH (6): Digital worker called the heartbeat endpoint"); 
         Optional<Job> jobOption = repo.findById(id);
 
         if (jobOption.isEmpty()){
@@ -33,22 +34,23 @@ public class DigitalWorkerController {
         Job job = jobOption.get();
         String dbTime = repo.getDatabaseTimestamp();
 
-        System.out.println("Is dbTime getting set in the database? = " + dbTime); 
+        System.out.println("HAPPY PATH (7): Last heartbeat timestamp updated to: " + dbTime); 
         job.setLastHeartbeatAt(new Timestamp(System.currentTimeMillis()));
         repo.save(job); 
         
+        System.out.println("HAPPY PATH (8): Database heartbeat timestamp updated successfully"); //Emma
+        System.out.println("HAPPY PATH (9): Digital worker recieved 200k from EC2"); 
         return ResponseEntity.ok(dbTime);
      }
 
     //Emma - Job Result API
     @PutMapping("/{id}/result")
     public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId, @RequestBody Map<String, String> digitalWorkerResponseBody){
-        System.out.println("In the job results!"); 
+        System.out.println("HAPPY PATH (10): Digital worker calls POST /dw/jobs/{jobId}/result endpoint"); 
         //Possible responses from the digital worker: success, failed, error, timeout
         Optional<Job> jobOption = repo.findById(jobId);
         //findById() returns an Optional/container object
         //Ensure container is not empty, if it is, job is not found
-        System.out.println("In the jobResults");
         if (jobOption.isEmpty()){
             return ResponseEntity.notFound().build();
         }
@@ -70,14 +72,22 @@ public class DigitalWorkerController {
 
         //OTHERWISE if everything looks gucci, then set the job status to be finished.
         job.setStatus("FINISHED");
+        
+        System.out.println("HAPPY PATH (11): Updating job result status to: FINISHED"); 
         job.setLastUpdatedBy("digital-worker");
         repo.save(job);
+
+        System.out.println("HAPPY PATH (12): Job status saved in the database"); 
+        System.out.println("HAPPY PATH (13): HAPPY PATH IS CONCLUDED :) !"); 
         return ResponseEntity.ok().build();
     }
 
     // Malek - Claim the oldest available job for a digital worker
     @PostMapping("/claim")
     public ResponseEntity<?> claimJob() {
+        System.out.println("HAPPY PATH (1): EventBridge Trigger Worker Execution"); //Also prints out in lambda, this is just here for clarity on ec2 debug logs
+        System.out.println("HAPPY PATH (2): Claim Job (GET, GET + PUT,...) "); //Emma added this print statement   
+
         try {
             
             List<Job> jobs = repo.findAll();
@@ -93,13 +103,13 @@ public class DigitalWorkerController {
 
             // 204 No Content → no jobs available
             if (claimableJob == null) {
-                System.out.println("No claimable job found");
                 return ResponseEntity.noContent().build();
             }
 
+            System.out.println("HAPPY PATH (3): Return oldest ready job + update 'in progress/running/...' "); //Emma
+
             // 409 Conflict → job exists but is not claimable
             if (!"CREATED".equalsIgnoreCase(claimableJob.getStatus())) {
-                System.out.println("Job already claimed, id = " + claimableJob.getId());
                 return ResponseEntity.status(409)
                         .body(Map.of(
                                 "message", "Job already claimed",
@@ -110,10 +120,9 @@ public class DigitalWorkerController {
 
             claimableJob.setStatus("IN_PROGRESS");
             claimableJob.setLastUpdatedBy("digital-worker");
+            System.out.println("HAPPY PATH (4): Job Row Updated to In Progress + Job Payload"); //Emma
 
             Job savedJob = repo.save(claimableJob);
-
-            System.out.println("Job successfully claimed, id = " + savedJob.getId());
 
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Job successfully claimed");
@@ -131,12 +140,12 @@ public class DigitalWorkerController {
             response.put("uploadedByUserId", savedJob.getUploadedByUserId());
             response.put("lastUpdatedBy", savedJob.getLastUpdatedBy());
 
+            System.out.println("HAPPY PATH (5): Digital worker got the job id and updated payload successfully"); //Emma
+
             // 200 OK → job claimed successfully
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            System.out.println("Server error while claiming job: " + e.getMessage());
-
             // 500 Internal Server Error
             return ResponseEntity.status(500)
                     .body(Map.of("message", "Server error"));
