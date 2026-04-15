@@ -36,6 +36,7 @@ public class JobController {
             @RequestBody CreateJobRequest req,
             @AuthenticationPrincipal Jwt jwt
     ) {
+
         // Manual validation (so you still meet “return 400 for invalid requests”)
         if (req == null) throw new ApiException(400, "Request body is required");
         if (req.jobType == null || req.jobType.trim().isEmpty())
