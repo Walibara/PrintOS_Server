@@ -24,10 +24,16 @@ public class JobController {
 
     private final JobRepository repo;
     private final UserRepository userRepository;
-
+     
     public JobController(JobRepository repo, UserRepository userRepository) {
         this.repo = repo;
         this.userRepository = userRepository;
+    }
+
+    @GetMapping("/userId")
+    public ResponseEntity<User> getUser(@PathVariable Long userId){
+        List<User> users = userRepository.findAllById(userId);
+        return ResponseEntity.ok(users);  
     }
 
     //Maria
