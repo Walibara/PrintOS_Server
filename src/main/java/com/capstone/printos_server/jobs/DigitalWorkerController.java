@@ -24,7 +24,7 @@ public class DigitalWorkerController {
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
 
-        System.debug("HAPPY PATH (6): Digital worker called the heartbeat endpoint"); 
+        System.out.println("HAPPY PATH (6): Digital worker called the heartbeat endpoint"); 
         Optional<Job> jobOption = repo.findById(id);
 
         if (jobOption.isEmpty()){
