@@ -33,7 +33,7 @@ public class JobController {
 
     @GetMapping("/userId")
     public ResponseEntity<User> getUser(@PathVariable Long userId){
-        List<String> list = new ArrayList<>();
+        List<Long> list = new ArrayList<>();
         list.add(userId); 
         List<User> users = userRepository.findAllById(list);
         return ResponseEntity.ok(users); 
