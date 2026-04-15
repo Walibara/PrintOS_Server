@@ -39,7 +39,7 @@ public class DigitalWorkerController {
         repo.save(job); 
         
         System.out.println("DIGITAL WORKER PATH (8): Database heartbeat timestamp updated successfully"); //Emma
-        System.out.println("DIGITAL WORKER PATH (9): Digital worker recieved 200k from EC2"); 
+        System.out.println("DIGITAL WORKER PATH (9): Digital worker recieved 200 ok from EC2"); 
         return ResponseEntity.ok(dbTime);
      }
 
@@ -87,6 +87,8 @@ public class DigitalWorkerController {
     // Malek - Claim the oldest available job for a digital worker
     @PostMapping("/claim")
     public ResponseEntity<?> claimJob() {
+        System.out.println(""); 
+        System.out.println("--------------------------------------------------------------------------------------------------");
         System.out.println("DIGITAL WORKER PATH (1): EventBridge Trigger Worker Execution"); //Also prints out in lambda, this is just here for clarity on ec2 debug logs
         System.out.println("DIGITAL WORKER PATH (2): Claim Job (GET, GET + PUT,...) "); //Emma added this print statement   
 
