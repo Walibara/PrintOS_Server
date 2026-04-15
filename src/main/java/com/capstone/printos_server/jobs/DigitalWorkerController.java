@@ -24,7 +24,7 @@ public class DigitalWorkerController {
      @PutMapping("/{id}/heartbeat")
      public ResponseEntity<String> heartbeat(@PathVariable Long id) {
 
-        System.out.println("HAPPY PATH (6): Digital worker called the heartbeat endpoint"); 
+        System.out.println("DIGITAL WORKER PATH (6): Digital worker called the heartbeat endpoint"); 
         Optional<Job> jobOption = repo.findById(id);
 
         if (jobOption.isEmpty()){
@@ -34,19 +34,19 @@ public class DigitalWorkerController {
         Job job = jobOption.get();
         String dbTime = repo.getDatabaseTimestamp();
 
-        System.out.println("HAPPY PATH (7): Last heartbeat timestamp updated to: " + dbTime); 
+        System.out.println("DIGITAL WORKER PATH (7): Last heartbeat timestamp updated to: " + dbTime); 
         job.setLastHeartbeatAt(new Timestamp(System.currentTimeMillis()));
         repo.save(job); 
         
-        System.out.println("HAPPY PATH (8): Database heartbeat timestamp updated successfully"); //Emma
-        System.out.println("HAPPY PATH (9): Digital worker recieved 200k from EC2"); 
+        System.out.println("DIGITAL WORKER PATH (8): Database heartbeat timestamp updated successfully"); //Emma
+        System.out.println("DIGITAL WORKER PATH (9): Digital worker recieved 200k from EC2"); 
         return ResponseEntity.ok(dbTime);
      }
 
     //Emma - Job Result API
     @PutMapping("/{id}/result")
     public ResponseEntity<?> jobResults(@PathVariable("id") Long jobId, @RequestBody Map<String, String> digitalWorkerResponseBody){
-        System.out.println("HAPPY PATH (10): Digital worker calls POST /dw/jobs/{jobId}/result endpoint"); 
+        System.out.println("DIGITAL WORKER PATH (10): Digital worker calls POST /dw/jobs/{jobId}/result endpoint"); 
         //Possible responses from the digital worker: success, failed, error, timeout
         Optional<Job> jobOption = repo.findById(jobId);
         //findById() returns an Optional/container object
@@ -59,11 +59,13 @@ public class DigitalWorkerController {
 
         //If status != success, then that means the digital worker died or something
         if("failed".equals(digitalWorkerResponseBody.get("status"))){
+            System.out.println("DIGITAL WORKER PATH (11): Updating job result status to: FAILED"); 
             job.setStatus("FAILED");
             job.setLastUpdatedBy("digital-worker");
             repo.save(job);
             return ResponseEntity.ok().build();
         }else if("error".equals(digitalWorkerResponseBody.get("status"))){
+            System.out.println("DIGITAL WORKER PATH (11): Updating job result status to: ERROR"); 
             job.setStatus("ERROR");
             job.setLastUpdatedBy("digital-worker");
             repo.save(job);
@@ -73,20 +75,20 @@ public class DigitalWorkerController {
         //OTHERWISE if everything looks gucci, then set the job status to be finished.
         job.setStatus("FINISHED");
         
-        System.out.println("HAPPY PATH (11): Updating job result status to: FINISHED"); 
+        System.out.println("DIGITAL WORKER PATH (11): Updating job result status to: FINISHED"); 
         job.setLastUpdatedBy("digital-worker");
         repo.save(job);
 
-        System.out.println("HAPPY PATH (12): Job status saved in the database"); 
-        System.out.println("HAPPY PATH (13): HAPPY PATH IS CONCLUDED :) !"); 
+        System.out.println("DIGITAL WORKER PATH (12): Job status saved in the database"); 
+        System.out.println("DIGITAL WORKER PATH (13): HAPPY PATH IS CONCLUDED :) !"); 
         return ResponseEntity.ok().build();
     }
 
     // Malek - Claim the oldest available job for a digital worker
     @PostMapping("/claim")
     public ResponseEntity<?> claimJob() {
-        System.out.println("HAPPY PATH (1): EventBridge Trigger Worker Execution"); //Also prints out in lambda, this is just here for clarity on ec2 debug logs
-        System.out.println("HAPPY PATH (2): Claim Job (GET, GET + PUT,...) "); //Emma added this print statement   
+        System.out.println("DIGITAL WORKER PATH (1): EventBridge Trigger Worker Execution"); //Also prints out in lambda, this is just here for clarity on ec2 debug logs
+        System.out.println("DIGITAL WORKER PATH (2): Claim Job (GET, GET + PUT,...) "); //Emma added this print statement   
 
         try {
             
@@ -106,7 +108,7 @@ public class DigitalWorkerController {
                 return ResponseEntity.noContent().build();
             }
 
-            System.out.println("HAPPY PATH (3): Return oldest ready job + update 'in progress/running/...' "); //Emma
+            System.out.println("DIGITAL WORKER PATH (3): Return oldest ready job + update 'in progress/running/...' "); //Emma
 
             // 409 Conflict → job exists but is not claimable
             if (!"CREATED".equalsIgnoreCase(claimableJob.getStatus())) {
@@ -120,7 +122,7 @@ public class DigitalWorkerController {
 
             claimableJob.setStatus("IN_PROGRESS");
             claimableJob.setLastUpdatedBy("digital-worker");
-            System.out.println("HAPPY PATH (4): Job Row Updated to In Progress + Job Payload"); //Emma
+            System.out.println("DIGITAL WORKER PATH (4): Job Row Updated to In Progress + Job Payload"); //Emma
 
             Job savedJob = repo.save(claimableJob);
 
@@ -140,7 +142,7 @@ public class DigitalWorkerController {
             response.put("uploadedByUserId", savedJob.getUploadedByUserId());
             response.put("lastUpdatedBy", savedJob.getLastUpdatedBy());
 
-            System.out.println("HAPPY PATH (5): Digital worker got the job id and updated payload successfully"); //Emma
+            System.out.println("DIGITAL WORKER PATH (5): Digital worker got the job id and updated payload successfully"); //Emma
 
             // 200 OK → job claimed successfully
             return ResponseEntity.ok(response);
