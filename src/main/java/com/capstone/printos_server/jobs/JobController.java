@@ -17,6 +17,7 @@ import java.util.List;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -32,8 +33,10 @@ public class JobController {
 
     @GetMapping("/userId")
     public ResponseEntity<User> getUser(@PathVariable Long userId){
-        List<User> users = userRepository.findAllById(userId);
-        return ResponseEntity.ok(users);  
+        List<String> list = new ArrayList<>();
+        list.add(userId); 
+        List<User> users = userRepository.findAllById(list);
+        return ResponseEntity.ok(users); 
     }
 
     //Maria
