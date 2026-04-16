@@ -17,11 +17,14 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Job info
-    private String name;
+    @Column(name = "job_number", unique = true)
+    private String jobNumber;
 
     @Column(name = "job_type")
     private String jobType;
+
+    @Column(name = "file_type")
+    private String originalFile;
 
     // File info
     private String files;
@@ -82,13 +85,10 @@ public class Job {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getJobNumber() {
+        return jobNumber;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getJobType() {
         return jobType;
@@ -98,12 +98,8 @@ public class Job {
         this.jobType = jobType;
     }
 
-    public String getFiles() {
-        return files;
-    }
-
-    public void setFiles(String files) {
-        this.files = files;
+    public String getS3Key() {
+        return s3Key;
     }
 
     public String getFileType() {
