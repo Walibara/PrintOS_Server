@@ -23,7 +23,7 @@ public class Job {
     @Column(name = "job_type")
     private String jobType;
 
-    @Column(name = "file_type")
+    @Column(name = "original_file")
     private String originalFile;
 
     @Column(name = "s3_key")
