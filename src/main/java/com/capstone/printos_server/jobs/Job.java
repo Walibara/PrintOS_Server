@@ -211,9 +211,6 @@ public class Job {
         this.originalFile = originalFile;
     }
 
-    public void setAdditionalCustomization(String additionalCustomization) {
-        this.additionalCustomization = additionalCustomization;
-    }
 
     public Double getCost() {
         return cost;
