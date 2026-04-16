@@ -85,6 +85,9 @@ public class Job {
         return jobNumber;
     }
 
+    public void setJobNumber(String jobNumber) {
+    this.jobNumber = jobNumber;
+   }
 
     public String getJobType() {
         return jobType;
