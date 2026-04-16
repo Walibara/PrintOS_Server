@@ -21,4 +21,5 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     AND (last_heartbeat_at IS NULL OR last_heartbeat_at < :timeout)
     """, nativeQuery = true)
     List<Job> findTimedOutJobs(@Param("timeout") Timestamp timeout);
+    List<Job> findByUploadedByUserId(Long uploadedByUserId);// Maria 4/15
 }
