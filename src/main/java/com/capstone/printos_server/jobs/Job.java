@@ -211,10 +211,6 @@ public class Job {
         this.originalFile = originalFile;
     }
 
-    public String getAdditionalCustomization() {
-        return additionalCustomization;
-    }
-
     public void setAdditionalCustomization(String additionalCustomization) {
         this.additionalCustomization = additionalCustomization;
     }
