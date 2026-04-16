@@ -26,6 +26,9 @@ public class Job {
     @Column(name = "file_type")
     private String originalFile;
 
+    @Column(name = "s3_key")
+    private String s3Key;
+
     // File info
     private String files;
 
@@ -70,10 +73,6 @@ public class Job {
     private Integer quantity;
 
     private String material;
-
-    private String originalFile;
-
-    private String additionalCustomization;
 
     private Double cost;
 
