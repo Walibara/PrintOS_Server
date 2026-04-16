@@ -17,14 +17,17 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Job info
-    private String name;
+    @Column(name = "job_number", unique = true)
+    private String jobNumber;
 
     @Column(name = "job_type")
     private String jobType;
 
-    // File info
-    private String files;
+    @Column(name = "original_file")
+    private String originalFile;
+
+    @Column(name = "s3_key")
+    private String s3Key;
 
     @Column(name = "file_type")
     private String fileType;
@@ -68,10 +71,6 @@ public class Job {
 
     private String material;
 
-    private String originalFile;
-
-    private String additionalCustomization;
-
     private Double cost;
 
     // -----------------------------------
@@ -82,13 +81,13 @@ public class Job {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getJobNumber() {
+        return jobNumber;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public void setJobNumber(String jobNumber) {
+    this.jobNumber = jobNumber;
+   }
 
     public String getJobType() {
         return jobType;
@@ -98,12 +97,12 @@ public class Job {
         this.jobType = jobType;
     }
 
-    public String getFiles() {
-        return files;
+    public String getS3Key() {
+        return s3Key;
     }
-
-    public void setFiles(String files) {
-        this.files = files;
+ 
+    public void setS3Key(String s3Key) {
+        this.s3Key = s3Key;
     }
 
     public String getFileType() {
@@ -216,13 +215,6 @@ public class Job {
         this.originalFile = originalFile;
     }
 
-    public String getAdditionalCustomization() {
-        return additionalCustomization;
-    }
-
-    public void setAdditionalCustomization(String additionalCustomization) {
-        this.additionalCustomization = additionalCustomization;
-    }
 
     public Double getCost() {
         return cost;

@@ -131,12 +131,13 @@ public class DigitalWorkerController {
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Job successfully claimed");
             response.put("jobId", savedJob.getId());
+            response.put("jobNumber", savedJob.getJobNumber());
             response.put("jobType", savedJob.getJobType());
             response.put("quantity", savedJob.getQuantity());
             response.put("material", savedJob.getMaterial());
             response.put("originalFile", savedJob.getOriginalFile());
+            response.put("s3Key", savedJob.getS3Key());
             response.put("fileType", savedJob.getFileType());
-            response.put("additionalCustomization", savedJob.getAdditionalCustomization());
             response.put("additionalComments", savedJob.getAdditionalComments());
             response.put("cost", savedJob.getCost());
             response.put("status", savedJob.getStatus());
