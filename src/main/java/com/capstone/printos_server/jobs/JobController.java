@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ArrayList;
+import java.util. Random;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -29,6 +30,13 @@ public class JobController {
     public JobController(JobRepository repo, UserRepository userRepository) {
         this.repo = repo;
         this.userRepository = userRepository;
+    }
+
+    // Added this to generate a random 6-digit job number for the user
+    private String generateJobNumber() {
+        Random random = new Random();
+        int number = 100000 + random.nextInt(900000);
+        return String.valueOf(number);
     }
 
     @GetMapping("/{userId}")
@@ -84,10 +92,12 @@ public class JobController {
 
         
             Job job = new Job();
+            job.setJobNumber(generateJobNumber()); //Maria 4/15
             job.setJobType(req.jobType.trim());
             job.setQuantity(req.quantity);
             job.setMaterial(req.material);
             job.setOriginalFile(req.originalFile);
+            job.setS3Key(req.s3Key);   //Maria 4/15
             job.setFileType(req.fileType);
             job.setAdditionalComments(req.additionalComments);
             job.setUploadedByUserId(user.getId()); 
@@ -111,12 +121,29 @@ public class JobController {
         }
     }
 
+    /*
     //Emma 2/2/26 Get Mapping - Get request http://3.144.187.189:8080/api/jobs
     @GetMapping
     public ResponseEntity<List<Job>> getJobs() {
         List<Job> jobs = repo.findAll();
         return ResponseEntity.ok(jobs);
     }
+    */ 
+    //Commenting this out while I try to see if this will work 
+
+    //Getting jobs by user instead of returning all of them - Maria 4/15
+    @GetMapping
+    public ResponseEntity<List<Job>> getJobs(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) throw new ApiException(401, "User authentication is required");
+
+        String cognitoSub = jwt.getClaimAsString("sub");
+        User user = userRepository.findByCognitoSub(cognitoSub)
+                .orElseThrow(() -> new ApiException(404, "User not found"));
+
+        List<Job> jobs = repo.findByUploadedByUserId(user.getId()); // ← ADDED
+        return ResponseEntity.ok(jobs);
+    }
+    
 
     // Malek - DELETE API endpoint
     @DeleteMapping("/{id}")
