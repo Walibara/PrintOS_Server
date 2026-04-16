@@ -29,9 +29,6 @@ public class Job {
     @Column(name = "s3_key")
     private String s3Key;
 
-    // File info
-    private String files;
-
     @Column(name = "file_type")
     private String fileType;
 
@@ -99,6 +96,10 @@ public class Job {
 
     public String getS3Key() {
         return s3Key;
+    }
+ 
+    public void setS3Key(String s3Key) {
+        this.s3Key = s3Key;
     }
 
     public String getFileType() {
