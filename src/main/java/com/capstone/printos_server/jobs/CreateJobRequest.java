@@ -6,6 +6,7 @@ public class CreateJobRequest {
 
     public String material;
     public String originalFile;
+    public String s3Key;  // added this 
     public String fileType;
     public String additionalComments;
 }
