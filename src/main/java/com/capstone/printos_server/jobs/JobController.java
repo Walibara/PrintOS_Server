@@ -78,9 +78,9 @@ public class JobController {
                         newUser.setCognitoSub(cognitoSub);
                         newUser.setEmail(email);
 
-                        String name = jwt.getClaimAsString("cognito:username");
+                        String name = jwt.getClaimAsString("name");
                         if (name == null || name.trim().isEmpty()){
-                            name = jwt.getClaimAsString("name");
+                            name = jwt.getClaimAsString("cognito:username");
                         }
                         if (name == null || name.trim().isEmpty()) {
                             name = email != null ? email.split("@")[0] : "Unknown";
