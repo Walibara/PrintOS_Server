@@ -72,7 +72,7 @@ public class S3Controller {
                 .build();
 
         PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(r -> r
-                .signatureDuration(Duration.ofMinutes(60))
+                .signatureDuration(Duration.ofHours(24))
                 .getObjectRequest(objectRequest)
         );
 
