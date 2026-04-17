@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
 import java.time.Duration;
 import java.util.Map;
@@ -52,6 +54,32 @@ public class S3Controller {
         return ResponseEntity.ok(Map.of(
                 "uploadUrl", presignedRequest.url().toString(),
                 "s3Key", s3Key
+        ));
+    }
+    
+    @GetMapping("/view-url")
+    public ResponseEntity<Map<String, String>> getViewUrl(
+            @RequestParam String s3Key
+    ) {
+        S3Presigner presigner = S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(InstanceProfileCredentialsProvider.create())
+                .build();
+
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(s3Key)
+                .build();
+
+        PresignedGetObjectRequest presignedRequest = presigner.presignGetObject(r -> r
+                .signatureDuration(Duration.ofMinutes(60))
+                .getObjectRequest(objectRequest)
+        );
+
+        presigner.close();
+
+        return ResponseEntity.ok(Map.of(
+                "viewUrl", presignedRequest.url().toString()
         ));
     }
 }
