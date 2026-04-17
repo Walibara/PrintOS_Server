@@ -140,8 +140,20 @@ public class JobController {
         User user = userRepository.findByCognitoSub(cognitoSub)
                 .orElseThrow(() -> new ApiException(404, "User not found"));
 
-        List<Job> jobs = repo.findByUploadedByUserId(user.getId()); // ← ADDED
+        List<Job> jobs = repo.findByUploadedByUserId(user.getId()); 
         return ResponseEntity.ok(jobs);
+    }
+    //Get the file for "My Library" - Maria 4/17
+    @GetMapping("/library")
+    public ResponseEntity<List<Job>> getLibrary(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) throw new ApiException(401, "User authentication is required");
+
+        String cognitoSub = jwt.getClaimAsString("sub");
+        User user = userRepository.findByCognitoSub(cognitoSub)
+                .orElseThrow(() -> new ApiException(404, "User not found"));
+
+        List<Job> files = repo.findDistinctFilesByUserId(user.getId());
+        return ResponseEntity.ok(files);
     }
     
 
