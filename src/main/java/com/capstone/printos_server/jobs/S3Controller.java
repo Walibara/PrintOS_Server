@@ -64,7 +64,7 @@ public class S3Controller {
 
     @GetMapping("/file/**")
     public ResponseEntity<byte[]> streamFile(jakarta.servlet.http.HttpServletRequest request) throws IOException {
-        // Extract the full s3Key from the path after /api/s3/file/
+        // Extract the full s3Key from the path after /api/s3/file/ - For cloudfront
         String s3Key = request.getRequestURI().split("/api/s3/file/", 2)[1];
 
         S3Client s3Client = S3Client.builder()
