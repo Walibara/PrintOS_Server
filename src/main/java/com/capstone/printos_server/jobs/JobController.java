@@ -105,6 +105,7 @@ public class JobController {
 
             job.setStatus("CREATED");
             job.setLastUpdatedBy("user:" + user.getId());
+            job.setFeatured(req.isFeatured != null && req.isFeatured);
             
 
             Job saved = repo.save(job);
@@ -152,8 +153,11 @@ public class JobController {
         User user = userRepository.findByCognitoSub(cognitoSub)
                 .orElseThrow(() -> new ApiException(404, "User not found"));
 
-        List<Job> files = repo.findDistinctFilesByUserId(user.getId());
-        return ResponseEntity.ok(files);
+        List<Job> files = repo.findDistinctFilesByUserId(user.getId())
+            .stream()
+            .filter(job -> !job.isFeatured())
+            .toList();
+    return ResponseEntity.ok(files);
     }
     
 
