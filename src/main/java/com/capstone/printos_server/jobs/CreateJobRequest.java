@@ -9,5 +9,6 @@ public class CreateJobRequest {
     public String s3Key;  // added this 
     public String fileType;
     public String additionalComments;
+    public Boolean isFeatured;
 }
 //removed uploadedByUserId and uploadedByUserId. (Maria)
