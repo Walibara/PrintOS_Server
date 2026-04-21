@@ -63,6 +63,9 @@ public class Job {
     @Column(name = "additional_comments")
     private String additionalComments;
 
+    @Column(name = "is_featured")
+    private boolean isFeatured;
+
     // -----------------------------------
     // Extra fields used by controllers
     // -----------------------------------
@@ -219,6 +222,14 @@ public class Job {
     public Double getCost() {
         return cost;
     }
+
+    public boolean isFeatured() {
+       return isFeatured;
+   }
+   
+   public void setFeatured(boolean featured) {
+       this.isFeatured = featured;
+   }
 
     public void setCost(Double cost) {
         this.cost = cost;
