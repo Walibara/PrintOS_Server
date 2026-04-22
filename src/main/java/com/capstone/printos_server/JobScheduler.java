@@ -35,6 +35,5 @@ public class JobScheduler {
          * Call service that performs requeue logic
          */
         jobService.requeueTimedOutJobs();
-        System.out.println("timed-out job requeued");
     }
 }
