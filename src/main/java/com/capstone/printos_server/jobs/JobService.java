@@ -37,7 +37,7 @@ public class JobService {
          * Query database for jobs that are stuck.
          */
         //List<Job> timedOutJobs = jobRepository.findTimedOutJobs(timeout);
-        Timestamp timeout = Timestamp.valueOf(LocalDateTime.now().minusMinutes(5));
+        Timestamp timeout = Timestamp.valueOf(LocalDateTime.now().minusMinutes(2));
         List<Job> timedOutJobs = jobRepository.findTimedOutJobs(timeout);
         for (Job job : timedOutJobs) {
             System.out.println("[REQUEUE] Job id=" + job.getId() + " retryCount=" + job.getRetryCount() + " maxRetries=" + job.getMaxRetries());
