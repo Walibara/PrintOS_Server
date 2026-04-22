@@ -43,7 +43,7 @@ public class Job {
     private int retryCount;
 
     @Column(name = "max_retries")
-    private int maxRetries;
+    private int maxRetries = 3;
 
     private String status;
 
